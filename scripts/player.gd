@@ -27,6 +27,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 		_jump_buffer_timer = 0.0
 		_coyote_timer = 0.0
+		Audio.play_sfx("jump")
 
 	var direction := Input.get_axis("move_left", "move_right")
 	if direction != 0.0:
