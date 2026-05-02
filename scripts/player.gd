@@ -10,7 +10,7 @@ const DASH_DURATION := 0.15
 const DASH_COOLDOWN := 0.5
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
-const SHOOT_OFFSET := Vector2(12.0, -4.0)
+const SHOOT_OFFSET := Vector2(12.0, 2.0)
 
 @onready var sprite: Sprite2D = $Sprite2D
 
