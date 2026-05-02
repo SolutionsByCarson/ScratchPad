@@ -41,7 +41,7 @@ Nothing is built yet. Default conventions we'll follow once we start, captured h
 
 Newest first. Format: `YYYY-MM-DD <short SHA> — what changed`.
 
-- 2026-05-01 — Wrote `CLAUDE.md` (this file) + `docs/playbook.md` (bookmarks + decisions table). Library scope set: links and decisions, no upstream-doc duplication.
+- 2026-05-01 `db4b6f7` — Wrote `CLAUDE.md` (this file) + `docs/playbook.md` (bookmarks + decisions table). Library scope set: links and decisions, no upstream-doc duplication.
 - 2026-05-01 `755868b` — Expanded `.gitignore` to cover `.claude/`, common AI assistant configs, editor metadata, and Godot export artifacts.
 - 2026-05-01 `4c6cc3e` — Initial commit. Scaffold-only Godot 4 project (`.editorconfig`, `.gitattributes`, `.gitignore`, `icon.svg`, `icon.svg.import`, `project.godot`).
 
