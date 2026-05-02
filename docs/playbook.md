@@ -10,7 +10,9 @@ Bookmarks + project decisions. Anything in the canonical docs lives at the link,
 | Base resolution | **320×180** | ×6 → 1080p, ×4 → 720p initial window. |
 | Palette | TBD (using Brackeys pack as-is) | Candidates if/when we lock: [PICO-8](https://lospec.com/palette-list/pico-8), [DB16](https://lospec.com/palette-list/dawnbringer-16), [AAP-64](https://lospec.com/palette-list/aap-64), [Resurrect-64](https://lospec.com/palette-list/resurrect-64). |
 | Tile size | **16×16** (Brackeys tileset). Knight character is 32×32 sheet. | |
-| Animation cadence | TBD | Knight sheet has idle/run/roll/hit/death rows; not yet wired as AnimatedSprite2D. |
+| Animation cadence | TBD | Knight + slime sheets are still on static frame 0. Wiring AnimatedSprite2D is open work. |
+| Audio | `Audio` autoload (`scripts/audio.gd`) | Single AudioStreamPlayer for music (looping MP3) + single AudioStreamPlayer for SFX. SFX collide if triggered rapidly — pool when that becomes audible. |
+| Group conventions | `"player"`, `"enemy"`, `"fruit"` | Set in each script's `_ready()`. Fruit checks `is_in_group("enemy")` to decide what to destroy. |
 | Art tool | TBD | Aseprite (standard) or [Pixelorama](https://github.com/Orama-Interactive/Pixelorama) (free, FOSS, made in Godot). |
 | Tilemap authoring | Direct sprite + StaticBody2D for now | Escalate to TileMapLayer or [LDtk](https://ldtk.io) when level count grows. |
 | Save format | Custom Resource (when needed) | Type-safe, native types. ConfigFile for user settings. |
