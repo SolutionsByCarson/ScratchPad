@@ -1,0 +1,83 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="Texture2D" path="res://assets/sprites/platforms.png" id="2_platforms"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(320, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(64, 16)
+
+[node name="Main" type="Node2D"]
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(0, 168)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+position = Vector2(160, 0)
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Tile1" type="Sprite2D" parent="Floor"]
+position = Vector2(32, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile2" type="Sprite2D" parent="Floor"]
+position = Vector2(96, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile3" type="Sprite2D" parent="Floor"]
+position = Vector2(160, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile4" type="Sprite2D" parent="Floor"]
+position = Vector2(224, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile5" type="Sprite2D" parent="Floor"]
+position = Vector2(288, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Platform1" type="StaticBody2D" parent="."]
+position = Vector2(80, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform1"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="Platform2" type="StaticBody2D" parent="."]
+position = Vector2(240, 80)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform2"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 32, 64, 16)
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(160, 80)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Controls" type="Label" parent="HUD"]
+offset_left = 4.0
+offset_top = 2.0
+offset_right = 320.0
+offset_bottom = 24.0
+text = "A/D or arrows - move    Space/W - jump"
