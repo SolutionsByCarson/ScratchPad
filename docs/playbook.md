@@ -44,6 +44,8 @@ Reference: [GDQuest pixel art setup](https://www.gdquest.com/library/pixel_art_s
 ## Known traps to avoid
 
 - **Smooth Camera2D + pixel snap fight each other.** Default `position_smoothing` produces visible jitter on snapped sprites. If/when we want smooth camera, use the SubViewport approach: [voithos/godot-smooth-pixel-camera-demo](https://github.com/voithos/godot-smooth-pixel-camera-demo). Don't waste time fighting the built-in smoothing first.
+- **Camera2D limits are scene-specific but live on the player.** Player's `Camera2D` carries the world bounds (currently `0, 0, 960, 180` for `main.tscn`). When we add another level, either parameterize via the player or move the camera onto the level scene.
+- **Wall jump tuning interacts with gravity, jump velocity, and wall slide cap.** Current values: `WALL_JUMP_VELOCITY=-300`, `WALL_JUMP_PUSH_X=220`, `WALL_SLIDE_MAX_FALL=80`, `WALL_STICK_TIME=0.20`, `WALL_JUMP_INPUT_LOCK=0.15`. Wall-climb a 56-px-wide shaft requires 2-3 wall jumps. If we change gravity, retune all of these together.
 - **TileMap is deprecated as of 4.3.** Always use [TileMapLayer](https://docs.godotengine.org/en/stable/classes/class_tilemaplayer.html). Editor has a one-click conversion if we ever inherit a TileMap.
 - **Rotating sprites breaks pixel grid.** Snap rotations to 90° or pre-render frames.
 - **TTF/anti-aliased font in pixel UI ruins the look.** Use a bitmap font or pixel-style TTF with hinting disabled.

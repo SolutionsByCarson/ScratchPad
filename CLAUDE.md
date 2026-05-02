@@ -20,14 +20,17 @@ This file is the project journal and architectural overview. Update it whenever:
 - **Tile size: 16×16** (Brackeys assets), character sprite 32×32 (knight).
 - **Art:** [Brackeys CC0 platformer asset pack](assets/CREDITS.txt) — knight, world_tileset, platforms, slime variants, fruit, coin + chiptune SFX/music + PixelOperator8 font.
 - **Pixel-perfect settings:** applied — Nearest filter default, `snap_2d_transforms_to_pixel`, `snap_2d_vertices_to_pixel`, viewport stretch with `keep` aspect.
-- **Playable test scene:** [scenes/main.tscn](scenes/main.tscn) (also the main scene) — knight on a tiled floor with two reachable platforms and a stationary green slime. Movement code in [scripts/player.gd](scripts/player.gd) supports walk, jump (coyote + buffer), dash (Shift), and shoot (J → fruit projectile). Fruit is an Area2D ([scripts/fruit.gd](scripts/fruit.gd)) that destroys "enemy"-group Area2Ds. Slime ([scripts/slime.gd](scripts/slime.gd)) plays hurt SFX on player contact and dies to fruit. Audio singleton ([scripts/audio.gd](scripts/audio.gd)) loops `time_for_adventure.mp3` and plays SFX on demand.
+- **Playable level:** [scenes/main.tscn](scenes/main.tscn) — 960×180 single-screen-tall level with floor, seven platforms at varied heights, two edge walls, a wall-jump shaft (two close walls + reward platform on top), and seven slimes (4 green, 3 purple). Camera2D in player.tscn is clamped to the world bounds.
+- **Player movement** ([scripts/player.gd](scripts/player.gd)): walk, jump (coyote + buffer), dash (Shift, with `power_up` SFX), shoot (J → fruit projectile from center mass), wall stick / slide / wall jump on vertical walls.
+- **Combat:** Fruit Area2D ([scripts/fruit.gd](scripts/fruit.gd)) flies at 250 px/s, despawns on walls, destroys "enemy"-group Area2Ds with `explosion` SFX. Slime ([scripts/slime.gd](scripts/slime.gd)) plays `hurt` SFX on player contact (0.6s cooldown) and dies to fruit. Purple slime is a texture-only variant ([scenes/slime_purple.tscn](scenes/slime_purple.tscn)).
+- **Audio singleton** ([scripts/audio.gd](scripts/audio.gd)) loops `time_for_adventure.mp3` and exposes `Audio.play_sfx(name)` for the six WAV SFX.
 - Palette / tilemap-authoring tool / save format: still TBD — see [docs/playbook.md](docs/playbook.md).
 
 ## Architecture overview
 
 Current tree:
 - `assets/` — fonts, music, sounds, sprites (CC0 from Brackeys pack)
-- `scenes/` — `main.tscn` (entry), `player.tscn`, `fruit.tscn` (projectile), `slime.tscn` (enemy)
+- `scenes/` — `main.tscn` (entry), `player.tscn`, `fruit.tscn` (projectile), `slime.tscn` (green enemy), `slime_purple.tscn` (purple variant)
 - `scripts/` — `audio.gd` (autoload), `player.gd`, `fruit.gd`, `slime.gd`
 - `docs/` — project documentation (playbook + future design notes)
 
@@ -59,6 +62,9 @@ Default conventions, captured here so they're not re-debated:
 
 Newest first. Format: `YYYY-MM-DD <short SHA> — what changed`.
 
+- 2026-05-01 `784683b` — Extended level to 960 wide. Added two edge walls, a wall-jump shaft (two close walls + reward platform), 5 new platforms across the new area, 6 new slimes (3 green + 3 purple) including one perched on Platform2 and one inside the shaft. Added `slime_purple.tscn` (texture-only variant). Camera2D in player.tscn clamped to world bounds. HUD label updated.
+- 2026-05-01 `f86f131` — Mario-style wall stick / slide / wall jump in player.gd. Press into a wall mid-air to cling for 0.2s, then slide capped at 80 px/s. Press jump while clinging for a 220 px/s push along wall normal + -300 jump velocity, with a 0.15s input lock so the player visually clears the wall.
+- 2026-05-01 `0a065ef` — Lowered fruit spawn from head to center mass (SHOOT_OFFSET y from -4 to +2).
 - 2026-05-01 `16b77a1` — Stationary slime enemy. Area2D in "enemy" group, plays hurt SFX on player contact (0.6s cooldown), dies to fruit projectile via the existing fruit→enemy interaction. One placed in `main.tscn`.
 - 2026-05-01 `ba920ac` — Fruit projectile + shoot action (J). Area2D moves at 250 px/s with 1.5s lifetime; despawns on wall hit; explodes "enemy" group Area2Ds with explosion SFX. Player added to "player" group to avoid self-collide. Spawns `tap` SFX on shoot.
 - 2026-05-01 `ae36cb5` — Dash mechanic (Shift): 320 px/s for 0.15s with 0.5s cooldown, follows last facing, zeros velocity.y mid-dash, plays `power_up` SFX.
@@ -78,15 +84,17 @@ Controls:
 - **Space** or **W** or up — jump
 - **Shift** — dash
 - **J** — shoot fruit
+- **Hold direction into a wall** while in the air — wall stick → slide; press jump while clinging for a wall jump
 
 ## Open questions
 
-1. Wire up AnimatedSprite2D for the knight (idle/run/jump cycles) using the existing knight sprite sheet?
+1. Wire up AnimatedSprite2D for the knight (idle/run/jump/dash/wall-cling cycles)?
 2. Animate the slime (idle hop using its 12-frame sheet)?
-3. Add a death/respawn system for the player after slime contact, or keep contact as a sound-only "hurt" for now?
-4. Move SFX paths into a Resource so the Audio singleton can be configured outside code?
-5. Aseprite or Pixelorama for any future custom art? (Drives whether we install the AsepriteWizard plugin.)
-6. Palette commitment — stay free-form with Brackeys' colors, or lock to a Lospec palette and palette-swap variants later?
-7. Target platforms — desktop only, or mobile/web from day one?
+3. Add a death/respawn system after slime contact, or keep contact as a sound-only "hurt" for now?
+4. Move levels into their own scene files so we can have multiple? (`main.tscn` is currently both the entry and the level.)
+5. Camera limits are hard-coded in `player.tscn` for the current 960×180 level — extract to per-level config when we add a second level.
+6. Aseprite or Pixelorama for any future custom art?
+7. Palette commitment — stay free-form, or lock to a Lospec palette and palette-swap variants later?
+8. Target platforms — desktop only, or mobile/web from day one?
 
 Update the decisions table in [docs/playbook.md](docs/playbook.md) and add a journal entry here when any of these land.
