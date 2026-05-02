@@ -5,13 +5,34 @@ const JUMP_VELOCITY := -350.0
 const COYOTE_TIME := 0.10
 const JUMP_BUFFER := 0.10
 
+const DASH_SPEED := 320.0
+const DASH_DURATION := 0.15
+const DASH_COOLDOWN := 0.5
+
 @onready var sprite: Sprite2D = $Sprite2D
 
 var _coyote_timer := 0.0
 var _jump_buffer_timer := 0.0
+var _facing := 1.0
+var _dash_time_left := 0.0
+var _dash_cooldown_left := 0.0
 
 
 func _physics_process(delta: float) -> void:
+	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
+
+	if Input.is_action_just_pressed("dash") and _dash_cooldown_left <= 0.0 and _dash_time_left <= 0.0:
+		_dash_time_left = DASH_DURATION
+		_dash_cooldown_left = DASH_COOLDOWN
+		Audio.play_sfx("power_up")
+
+	if _dash_time_left > 0.0:
+		_dash_time_left -= delta
+		velocity.x = _facing * DASH_SPEED
+		velocity.y = 0.0
+		move_and_slide()
+		return
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 		_coyote_timer -= delta
@@ -33,6 +54,7 @@ func _physics_process(delta: float) -> void:
 	if direction != 0.0:
 		velocity.x = direction * SPEED
 		sprite.flip_h = direction < 0.0
+		_facing = direction
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, SPEED)
 

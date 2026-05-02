@@ -80,4 +80,4 @@ offset_left = 4.0
 offset_top = 2.0
 offset_right = 320.0
 offset_bottom = 24.0
-text = "A/D or arrows - move    Space/W - jump"
+text = "A/D - move    Space/W - jump    Shift - dash"
