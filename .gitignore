@@ -1,3 +1,29 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Claude Code / AI tooling — local config and ephemeral artifacts
+.claude/
+.claude/**
+.claudeignore
+.aider*
+.cursor/
+.cursorignore
+.continue/
+
+# Editor / OS noise
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Godot exports / build artifacts
+/build/
+/exports/
+/export/
+*.import.bak
+*.translation
+.import/
+
