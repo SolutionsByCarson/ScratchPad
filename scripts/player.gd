@@ -9,6 +9,12 @@ const DASH_SPEED := 320.0
 const DASH_DURATION := 0.15
 const DASH_COOLDOWN := 0.5
 
+const WALL_STICK_TIME := 0.20
+const WALL_SLIDE_MAX_FALL := 80.0
+const WALL_JUMP_PUSH_X := 220.0
+const WALL_JUMP_VELOCITY := -300.0
+const WALL_JUMP_INPUT_LOCK := 0.15
+
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, 2.0)
 
@@ -19,6 +25,8 @@ var _jump_buffer_timer := 0.0
 var _facing := 1.0
 var _dash_time_left := 0.0
 var _dash_cooldown_left := 0.0
+var _wall_stick_left := WALL_STICK_TIME
+var _wall_jump_lock_left := 0.0
 
 
 func _ready() -> void:
@@ -43,30 +51,59 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	if not is_on_floor():
+	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
+
+	var input_dir := Input.get_axis("move_left", "move_right")
+	var on_floor := is_on_floor()
+	var on_wall := is_on_wall_only()
+	var wall_normal := get_wall_normal()
+	var pressing_into_wall := on_wall and input_dir != 0.0 and signf(input_dir) != signf(wall_normal.x)
+	var wall_clinging := pressing_into_wall and velocity.y >= 0.0
+
+	if on_floor:
+		_coyote_timer = COYOTE_TIME
+		_wall_stick_left = WALL_STICK_TIME
+	elif wall_clinging and _wall_stick_left > 0.0:
+		velocity.y = 0.0
+		_wall_stick_left -= delta
+		_coyote_timer = 0.0
+	elif wall_clinging:
+		velocity += get_gravity() * delta
+		velocity.y = min(velocity.y, WALL_SLIDE_MAX_FALL)
+		_coyote_timer = 0.0
+	else:
 		velocity += get_gravity() * delta
 		_coyote_timer -= delta
-	else:
-		_coyote_timer = COYOTE_TIME
+		if not on_wall:
+			_wall_stick_left = WALL_STICK_TIME
 
 	if Input.is_action_just_pressed("jump"):
 		_jump_buffer_timer = JUMP_BUFFER
 	else:
 		_jump_buffer_timer -= delta
 
-	if _jump_buffer_timer > 0.0 and _coyote_timer > 0.0:
+	if _jump_buffer_timer > 0.0 and not on_floor and on_wall:
+		velocity.x = wall_normal.x * WALL_JUMP_PUSH_X
+		velocity.y = WALL_JUMP_VELOCITY
+		_wall_jump_lock_left = WALL_JUMP_INPUT_LOCK
+		_facing = wall_normal.x
+		sprite.flip_h = wall_normal.x < 0.0
+		_jump_buffer_timer = 0.0
+		_wall_stick_left = WALL_STICK_TIME
+		Audio.play_sfx("jump")
+	elif _jump_buffer_timer > 0.0 and _coyote_timer > 0.0:
 		velocity.y = JUMP_VELOCITY
 		_jump_buffer_timer = 0.0
 		_coyote_timer = 0.0
 		Audio.play_sfx("jump")
 
-	var direction := Input.get_axis("move_left", "move_right")
-	if direction != 0.0:
-		velocity.x = direction * SPEED
-		sprite.flip_h = direction < 0.0
-		_facing = direction
-	else:
-		velocity.x = move_toward(velocity.x, 0.0, SPEED)
+	if _wall_jump_lock_left <= 0.0:
+		if input_dir != 0.0:
+			velocity.x = input_dir * SPEED
+			sprite.flip_h = input_dir < 0.0
+			_facing = input_dir
+		else:
+			velocity.x = move_toward(velocity.x, 0.0, SPEED)
 
 	move_and_slide()
 
