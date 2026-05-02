@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/slime.gd" id="1_slime"]
+[ext_resource type="Texture2D" path="res://assets/sprites/slime_purple.png" id="2_slime_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_slime"]
+size = Vector2(16, 14)
+
+[node name="SlimePurple" type="Area2D"]
+script = ExtResource("1_slime")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_slime_tex")
+region_enabled = true
+region_rect = Rect2(0, 0, 24, 24)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("RectangleShape2D_slime")
