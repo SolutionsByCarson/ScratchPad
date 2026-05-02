@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="Texture2D" path="res://assets/sprites/platforms.png" id="2_platforms"]
+[ext_resource type="PackedScene" path="res://scenes/slime.tscn" id="3_slime"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(320, 16)
@@ -72,6 +73,9 @@ region_rect = Rect2(0, 32, 64, 16)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 position = Vector2(160, 80)
+
+[node name="Slime" parent="." instance=ExtResource("3_slime")]
+position = Vector2(60, 148)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
