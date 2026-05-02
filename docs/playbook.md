@@ -2,18 +2,19 @@
 
 Bookmarks + project decisions. Anything in the canonical docs lives at the link, not here.
 
-## Project decisions (TBD until set)
+## Project decisions
 
 | Decision | Choice | Notes |
 |---|---|---|
-| Genre / pillars | TBD | |
-| Base resolution | TBD | Likely `320×180` (×6 → 1080p) or `640×360` (×3 → 1080p, ×6 → 4K). |
-| Palette | TBD | Candidates: [PICO-8 16](https://lospec.com/palette-list/pico-8), [DB16](https://lospec.com/palette-list/dawnbringer-16), [AAP-64](https://lospec.com/palette-list/aap-64), [Resurrect-64](https://lospec.com/palette-list/resurrect-64). |
-| Tile size | TBD | 16×16 default unless we have a reason. |
-| Target FPS / animation cadence | TBD | 12 fps for retro feel, 60 logic w/ stepped art most common. |
-| Art tool | TBD | Aseprite (paid, standard) or [Pixelorama](https://github.com/Orama-Interactive/Pixelorama) (free, made in Godot). |
-| Tilemap authoring | TBD | Built-in is fine until proven not enough. Escalate to [LDtk](https://ldtk.io) for big worlds. |
-| Save format | Custom Resource (default) | Type-safe, native types. ConfigFile only for user settings. |
+| Genre / pillars | Simple platformer | Locked 2026-05-01. |
+| Base resolution | **320×180** | ×6 → 1080p, ×4 → 720p initial window. |
+| Palette | TBD (using Brackeys pack as-is) | Candidates if/when we lock: [PICO-8](https://lospec.com/palette-list/pico-8), [DB16](https://lospec.com/palette-list/dawnbringer-16), [AAP-64](https://lospec.com/palette-list/aap-64), [Resurrect-64](https://lospec.com/palette-list/resurrect-64). |
+| Tile size | **16×16** (Brackeys tileset). Knight character is 32×32 sheet. | |
+| Animation cadence | TBD | Knight sheet has idle/run/roll/hit/death rows; not yet wired as AnimatedSprite2D. |
+| Art tool | TBD | Aseprite (standard) or [Pixelorama](https://github.com/Orama-Interactive/Pixelorama) (free, FOSS, made in Godot). |
+| Tilemap authoring | Direct sprite + StaticBody2D for now | Escalate to TileMapLayer or [LDtk](https://ldtk.io) when level count grows. |
+| Save format | Custom Resource (when needed) | Type-safe, native types. ConfigFile for user settings. |
+| Source assets | [Brackeys CC0 platformer pack](../assets/CREDITS.txt) | knight, slimes, fruit, coin, world_tileset, platforms, chiptune SFX/music, PixelOperator8 font. |
 
 Update this table as choices land — and commit each change.
 

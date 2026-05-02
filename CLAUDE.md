@@ -15,13 +15,23 @@ This file is the project journal and architectural overview. Update it whenever:
 
 ## Project state (2026-05-01)
 
-- Genre: undecided
-- Base resolution, palette, tile size, art tool: all undecided — see "Project decisions" table in [docs/playbook.md](docs/playbook.md)
-- Pixel-perfect Project Settings: **not yet applied** to `project.godot` — defaults are still in place. To do before any sprites land.
+- **Genre: simple platformer.**
+- **Base resolution: 320×180** (16:9, integer-scales to 1080p ×6 / 4K ×12). Initial window 1280×720 (×4).
+- **Tile size: 16×16** (Brackeys assets), character sprite 32×32 (knight).
+- **Art:** [Brackeys CC0 platformer asset pack](assets/CREDITS.txt) — knight, world_tileset, platforms, slime variants, fruit, coin + chiptune SFX/music + PixelOperator8 font.
+- **Pixel-perfect settings:** applied — Nearest filter default, `snap_2d_transforms_to_pixel`, `snap_2d_vertices_to_pixel`, viewport stretch with `keep` aspect.
+- **Playable test scene:** [scenes/main.tscn](scenes/main.tscn) (also the main scene) — knight on a tiled floor with two reachable platforms; A/D/arrows move, Space/W jumps. Movement code in [scripts/player.gd](scripts/player.gd) with coyote time and jump buffering.
+- Palette / tilemap-authoring tool / save format: still TBD — see [docs/playbook.md](docs/playbook.md).
 
 ## Architecture overview
 
-Nothing is built yet. Default conventions we'll follow once we start, captured here so they're not re-debated:
+Current tree:
+- `assets/` — fonts, music, sounds, sprites (CC0 from Brackeys pack)
+- `scenes/` — `.tscn` scene files (`main.tscn` is entry, instances `player.tscn`)
+- `scripts/` — `.gd` scripts (`player.gd` is the platformer controller)
+- `docs/` — project documentation (playbook + future design notes)
+
+Default conventions, captured here so they're not re-debated:
 
 - **Pixel-perfect rendering** — Stretch Mode `viewport`, Nearest filter, snap transforms to pixel. Detailed settings in [docs/playbook.md](docs/playbook.md).
 - **Composition over inheritance** — features are child nodes (HealthComponent, HitboxComponent, etc.), not deep class hierarchies.
@@ -41,14 +51,21 @@ Nothing is built yet. Default conventions we'll follow once we start, captured h
 
 Newest first. Format: `YYYY-MM-DD <short SHA> — what changed`.
 
-- 2026-05-01 `db4b6f7` — Wrote `CLAUDE.md` (this file) + `docs/playbook.md` (bookmarks + decisions table). Library scope set: links and decisions, no upstream-doc duplication.
+- 2026-05-01 `6214cf4` — Playable movement test scene. Pixel-perfect project settings (320×180, Nearest, snap), Input Map (move_left/right/jump on WASD/arrows/Space), `Player` scene with movement script (gravity, coyote time, jump buffer, sprite flip), `Main` scene with tiled floor + two platforms + HUD controls hint. Set as main scene.
+- 2026-05-01 `294c2d3` — Imported Brackeys 2D platformer asset pack (CC0) into `assets/{fonts,music,sounds,sprites}`; original zip removed.
+- 2026-05-01 `eb1d0cd` `db4b6f7` — Wrote `CLAUDE.md` (this file) + `docs/playbook.md` (bookmarks + decisions table). Library scope: links and decisions, no upstream-doc duplication.
 - 2026-05-01 `755868b` — Expanded `.gitignore` to cover `.claude/`, common AI assistant configs, editor metadata, and Godot export artifacts.
 - 2026-05-01 `4c6cc3e` — Initial commit. Scaffold-only Godot 4 project (`.editorconfig`, `.gitattributes`, `.gitignore`, `icon.svg`, `icon.svg.import`, `project.godot`).
 
-## Open questions for the next session
+## How to run
 
-1. What genre / game pillars are we aiming at? (Drives resolution, tile size, palette.)
-2. Aseprite or Pixelorama? (Drives whether we install the AsepriteWizard plugin.)
-3. Are we targeting desktop-only initially, or mobile/web from day one? (Stretch settings differ.)
+Open the project in Godot 4 and press F5 (or use the play button). Main scene is `scenes/main.tscn`. Controls: A/D or arrows to move, Space or W to jump.
 
-Once any of these are answered, update the decisions table in [docs/playbook.md](docs/playbook.md) and add a journal entry here.
+## Open questions
+
+1. Aseprite or Pixelorama for any custom art? (Drives whether we install the AsepriteWizard plugin.)
+2. Palette commitment — stay free-form with Brackeys' colors, or lock to a Lospec palette and palette-swap variants later?
+3. Is the knight sprite sheet's frame layout something we want to wire up as AnimatedSprite2D animations now (idle/run/jump cycle), or stay on a static frame for now?
+4. Target platforms — desktop only, or mobile/web from day one?
+
+Update the decisions table in [docs/playbook.md](docs/playbook.md) and add a journal entry here when any of these land.
