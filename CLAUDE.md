@@ -62,6 +62,9 @@ Default conventions, captured here so they're not re-debated:
 
 Newest first. Format: `YYYY-MM-DD <short SHA> — what changed`.
 
+- 2026-05-01 `a26c8d3` — Camera dead zone (30% horizontal, 25% vertical drag margin) so the player can wiggle in the middle without the camera chasing. Removed top limit so the camera pans up on tall jumps.
+- 2026-05-01 `8c5749c` — Slime AI. Wander within ±48px of starting x at 24 px/s (random direction every 1-3s); chase player at 56 px/s when within 80px.
+- 2026-05-01 `204354d` — Doc refresh for wall jump + extended level.
 - 2026-05-01 `784683b` — Extended level to 960 wide. Added two edge walls, a wall-jump shaft (two close walls + reward platform), 5 new platforms across the new area, 6 new slimes (3 green + 3 purple) including one perched on Platform2 and one inside the shaft. Added `slime_purple.tscn` (texture-only variant). Camera2D in player.tscn clamped to world bounds. HUD label updated.
 - 2026-05-01 `f86f131` — Mario-style wall stick / slide / wall jump in player.gd. Press into a wall mid-air to cling for 0.2s, then slide capped at 80 px/s. Press jump while clinging for a 220 px/s push along wall normal + -300 jump velocity, with a 0.15s input lock so the player visually clears the wall.
 - 2026-05-01 `0a065ef` — Lowered fruit spawn from head to center mass (SHOOT_OFFSET y from -4 to +2).
