@@ -26,23 +26,24 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_hurt_cooldown_left = max(0.0, _hurt_cooldown_left - delta)
 
-	var player := get_tree().get_first_node_in_group("player") as Node2D
-	var move_dir := 0.0
-	var speed := WANDER_SPEED
+	var player: Node2D = get_tree().get_first_node_in_group("player")
+	var move_dir: float = 0.0
+	var move_speed: float = WANDER_SPEED
 
 	if player != null:
-		var dx: float = player.global_position.x - global_position.x
-		var dy: float = player.global_position.y - global_position.y
+		var player_pos: Vector2 = player.global_position
+		var dx: float = player_pos.x - global_position.x
+		var dy: float = player_pos.y - global_position.y
 		var dist_sq: float = dx * dx + dy * dy
 		if dist_sq < DETECT_RADIUS * DETECT_RADIUS:
 			move_dir = signf(dx)
-			speed = CHASE_SPEED
+			move_speed = CHASE_SPEED
 		else:
 			move_dir = _update_wander(delta)
 	else:
 		move_dir = _update_wander(delta)
 
-	position.x += move_dir * speed * delta
+	position.x += move_dir * move_speed * delta
 	position.x = clamp(position.x, WORLD_MIN_X, WORLD_MAX_X)
 
 	if move_dir != 0.0:
@@ -66,7 +67,8 @@ func _update_wander(delta: float) -> float:
 
 func _pick_new_wander_direction() -> void:
 	_wander_change_left = randf_range(1.0, 3.0)
-	_wander_direction = [-1, 0, 1].pick_random()
+	var choices: Array[int] = [-1, 0, 1]
+	_wander_direction = choices.pick_random()
 
 
 func _on_body_entered(body: Node) -> void:
