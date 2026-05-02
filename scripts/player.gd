@@ -9,6 +9,9 @@ const DASH_SPEED := 320.0
 const DASH_DURATION := 0.15
 const DASH_COOLDOWN := 0.5
 
+const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
+const SHOOT_OFFSET := Vector2(12.0, -4.0)
+
 @onready var sprite: Sprite2D = $Sprite2D
 
 var _coyote_timer := 0.0
@@ -18,7 +21,14 @@ var _dash_time_left := 0.0
 var _dash_cooldown_left := 0.0
 
 
+func _ready() -> void:
+	add_to_group("player")
+
+
 func _physics_process(delta: float) -> void:
+	if Input.is_action_just_pressed("shoot"):
+		_shoot()
+
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
 
 	if Input.is_action_just_pressed("dash") and _dash_cooldown_left <= 0.0 and _dash_time_left <= 0.0:
@@ -59,3 +69,11 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, SPEED)
 
 	move_and_slide()
+
+
+func _shoot() -> void:
+	var fruit := FRUIT_SCENE.instantiate()
+	fruit.position = global_position + Vector2(_facing * SHOOT_OFFSET.x, SHOOT_OFFSET.y)
+	fruit.direction = _facing
+	get_parent().add_child(fruit)
+	Audio.play_sfx("tap")
