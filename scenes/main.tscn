@@ -169,6 +169,7 @@ position = Vector2(80, 120)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform1"]
 position = Vector2(-7.5, -3)
 shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Platform1"]
 texture = ExtResource("2_platforms")
@@ -181,6 +182,7 @@ position = Vector2(240, 80)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
 position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Platform2"]
 texture = ExtResource("2_platforms")
@@ -193,6 +195,7 @@ position = Vector2(640, 100)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform4"]
 position = Vector2(-8.5, -3)
 shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Platform4"]
 texture = ExtResource("2_platforms")
@@ -205,6 +208,7 @@ position = Vector2(527, -22)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform5"]
 position = Vector2(16, -3.5)
 shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Platform5"]
 texture = ExtResource("2_platforms")
@@ -223,6 +227,7 @@ position = Vector2(820, 130)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform6"]
 position = Vector2(-8.125, -3)
 shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Platform6"]
 texture = ExtResource("2_platforms")
@@ -235,6 +240,7 @@ position = Vector2(880, 80)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform7"]
 position = Vector2(-8.25, -3.5)
 shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
 
 [node name="Sprite2D" type="Sprite2D" parent="Platform7"]
 texture = ExtResource("2_platforms")

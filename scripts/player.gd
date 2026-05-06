@@ -82,6 +82,9 @@ func _physics_process(delta: float) -> void:
 		_update_floor_tracking()
 		return
 
+	if is_on_floor() and Input.is_action_just_pressed("slam") and _is_on_one_way_platform():
+		global_position.y += 2.0
+
 	if not is_on_floor() and not _slamming and Input.is_action_just_pressed("slam"):
 		_slamming = true
 		_hanging = false
@@ -264,6 +267,26 @@ func _classify_wall_contact() -> Dictionary:
 			result.type = "platform_side"
 		return result
 	return result
+
+
+func _is_on_one_way_platform() -> bool:
+	for i in range(get_slide_collision_count()):
+		var collision := get_slide_collision(i)
+		var n: Vector2 = collision.get_normal()
+		if n.y > -0.7:
+			continue
+		var collider: Object = collision.get_collider()
+		if collider == null:
+			continue
+		var collider_node: Node = collider as Node
+		if collider_node == null:
+			continue
+		for child in collider_node.get_children():
+			if child is CollisionShape2D:
+				var cs: CollisionShape2D = child
+				if cs.one_way_collision:
+					return true
+	return false
 
 
 func _shape_info(node: Node) -> Dictionary:
