@@ -62,6 +62,9 @@ Default conventions, captured here so they're not re-debated:
 
 Newest first. Format: `YYYY-MM-DD <short SHA> — what changed`.
 
+- 2026-05-01 `a2b8fba` — Wall-stick now restricted to vertical walls (shape size.y > size.x). On horizontal platform sides, if the player approaches near the top edge while pressing into it, they "hang" with collision flush against the platform top; pressing jump mantles them onto the platform.
+- 2026-05-01 `a999136` — Lowered music + SFX volume by ~5dB each (~40% loudness). Re-added Controls Label inside HUD with the full move list.
+- 2026-05-01 `89a3e53` — Ground slam ability on Down/S. While airborne, snaps velocity to +500 px/s downward; on landing, destroys "enemy"-group nodes within 36px and plays explosion SFX (or tap on a clean miss).
 - 2026-05-01 `a26c8d3` — Camera dead zone (30% horizontal, 25% vertical drag margin) so the player can wiggle in the middle without the camera chasing. Removed top limit so the camera pans up on tall jumps.
 - 2026-05-01 `8c5749c` — Slime AI. Wander within ±48px of starting x at 24 px/s (random direction every 1-3s); chase player at 56 px/s when within 80px.
 - 2026-05-01 `204354d` — Doc refresh for wall jump + extended level.
