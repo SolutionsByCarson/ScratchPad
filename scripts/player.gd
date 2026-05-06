@@ -81,7 +81,7 @@ func _physics_process(delta: float) -> void:
 	elif _wall_attached and signf(contact_normal_x) != signf(_wall_attached_normal_x):
 		_wall_attached = false
 
-	if not _wall_attached and Input.is_action_just_pressed("shoot"):
+	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("shoot"):
 		_shoot()
 
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)

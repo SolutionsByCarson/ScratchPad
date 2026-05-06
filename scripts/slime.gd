@@ -131,6 +131,10 @@ func _do_wander(delta: float) -> void:
 		_wander_direction = -_wander_direction
 		return
 
+	if _is_blocked_at(next_x + move_dir * 8.0, position.y):
+		_wander_direction = -_wander_direction
+		return
+
 	position.x = next_x
 	sprite.flip_h = move_dir < 0.0
 
@@ -142,6 +146,9 @@ func _do_chase(delta: float, dx: float) -> void:
 	var next_x: float = position.x + move_dir * CHASE_SPEED * delta
 
 	if not is_floating and not _has_ground_at(next_x):
+		return
+
+	if _is_blocked_at(next_x + move_dir * 8.0, position.y):
 		return
 
 	position.x = next_x
@@ -156,6 +163,15 @@ func _has_ground_at(x: float) -> bool:
 	query.collide_with_areas = false
 	var hit: Dictionary = space.intersect_ray(query)
 	return not hit.is_empty()
+
+
+func _is_blocked_at(x: float, y: float) -> bool:
+	var space := get_world_2d().direct_space_state
+	var query := PhysicsPointQueryParameters2D.new()
+	query.position = Vector2(x, y)
+	query.collide_with_areas = false
+	var results: Array = space.intersect_point(query)
+	return results.size() > 0
 
 
 func _ground_y_below(x: float, from_y: float) -> float:
