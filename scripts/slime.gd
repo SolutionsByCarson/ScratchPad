@@ -145,8 +145,8 @@ func _do_chase(delta: float, dx: float) -> void:
 
 func _has_ground_at(x: float) -> bool:
 	var space := get_world_2d().direct_space_state
-	var origin: Vector2 = Vector2(x, _initial_y + 14.0)
-	var target: Vector2 = origin + Vector2(0.0, 14.0)
+	var origin: Vector2 = Vector2(x, _initial_y - 4.0)
+	var target: Vector2 = origin + Vector2(0.0, 32.0)
 	var query := PhysicsRayQueryParameters2D.create(origin, target)
 	query.collide_with_areas = false
 	var hit: Dictionary = space.intersect_ray(query)
