@@ -17,7 +17,7 @@ const GROUND_OFFSET := 12.0  # slime center y + this = floor surface y
 const WIND_UP_DURATION := 0.35
 const LAND_RECOVER_DURATION := 0.25
 const WORLD_MIN_X := 16.0
-const WORLD_MAX_X := 944.0
+const WORLD_MAX_X := 2864.0
 
 const NORMAL_SCALE := Vector2(1.0, 1.0)
 const WIND_UP_SCALE := Vector2(1.3, 0.7)

@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/slime_purple.tscn" id="4_slime_purple"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
-size = Vector2(960, 16)
+size = Vector2(2880, 16)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_short"]
 size = Vector2(16, 64)
@@ -23,7 +23,7 @@ size = Vector2(48.25, 9)
 position = Vector2(0, 168)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
-position = Vector2(480, 0)
+position = Vector2(1440, 0)
 shape = SubResource("RectangleShape2D_floor")
 
 [node name="Tile1" type="Sprite2D" parent="Floor"]
@@ -116,6 +116,186 @@ texture = ExtResource("2_platforms")
 region_enabled = true
 region_rect = Rect2(0, 0, 64, 16)
 
+[node name="Tile16" type="Sprite2D" parent="Floor"]
+position = Vector2(992, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile17" type="Sprite2D" parent="Floor"]
+position = Vector2(1056, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile18" type="Sprite2D" parent="Floor"]
+position = Vector2(1120, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile19" type="Sprite2D" parent="Floor"]
+position = Vector2(1184, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile20" type="Sprite2D" parent="Floor"]
+position = Vector2(1248, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile21" type="Sprite2D" parent="Floor"]
+position = Vector2(1312, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile22" type="Sprite2D" parent="Floor"]
+position = Vector2(1376, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile23" type="Sprite2D" parent="Floor"]
+position = Vector2(1440, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile24" type="Sprite2D" parent="Floor"]
+position = Vector2(1504, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile25" type="Sprite2D" parent="Floor"]
+position = Vector2(1568, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile26" type="Sprite2D" parent="Floor"]
+position = Vector2(1632, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile27" type="Sprite2D" parent="Floor"]
+position = Vector2(1696, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile28" type="Sprite2D" parent="Floor"]
+position = Vector2(1760, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile29" type="Sprite2D" parent="Floor"]
+position = Vector2(1824, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile30" type="Sprite2D" parent="Floor"]
+position = Vector2(1888, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile31" type="Sprite2D" parent="Floor"]
+position = Vector2(1952, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile32" type="Sprite2D" parent="Floor"]
+position = Vector2(2016, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile33" type="Sprite2D" parent="Floor"]
+position = Vector2(2080, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile34" type="Sprite2D" parent="Floor"]
+position = Vector2(2144, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile35" type="Sprite2D" parent="Floor"]
+position = Vector2(2208, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile36" type="Sprite2D" parent="Floor"]
+position = Vector2(2272, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile37" type="Sprite2D" parent="Floor"]
+position = Vector2(2336, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile38" type="Sprite2D" parent="Floor"]
+position = Vector2(2400, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile39" type="Sprite2D" parent="Floor"]
+position = Vector2(2464, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile40" type="Sprite2D" parent="Floor"]
+position = Vector2(2528, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile41" type="Sprite2D" parent="Floor"]
+position = Vector2(2592, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile42" type="Sprite2D" parent="Floor"]
+position = Vector2(2656, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile43" type="Sprite2D" parent="Floor"]
+position = Vector2(2720, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile44" type="Sprite2D" parent="Floor"]
+position = Vector2(2784, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
+[node name="Tile45" type="Sprite2D" parent="Floor"]
+position = Vector2(2848, 0)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 16)
+
 [node name="LeftEdgeWall" type="StaticBody2D" parent="."]
 position = Vector2(8, 128)
 
@@ -128,7 +308,7 @@ region_enabled = true
 region_rect = Rect2(24, 0, 16, 64)
 
 [node name="RightEdgeWall" type="StaticBody2D" parent="."]
-position = Vector2(952, 128)
+position = Vector2(2872, 128)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightEdgeWall"]
 shape = SubResource("RectangleShape2D_wall_short")
@@ -302,3 +482,227 @@ position = Vector2(0, -115)
 texture = ExtResource("2_platforms")
 region_enabled = true
 region_rect = Rect2(24, 0, 16, 64)
+
+[node name="Platform8" type="StaticBody2D" parent="."]
+position = Vector2(1040, 130)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform8"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform8"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="Platform9" type="StaticBody2D" parent="."]
+position = Vector2(1180, 100)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform9"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform9"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 32, 64, 16)
+
+[node name="Platform10" type="StaticBody2D" parent="."]
+position = Vector2(1320, 70)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform10"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform10"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 48, 64, 16)
+
+[node name="Platform11" type="StaticBody2D" parent="."]
+position = Vector2(1460, 110)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform11"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform11"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="Platform12" type="StaticBody2D" parent="."]
+position = Vector2(1600, 80)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform12"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform12"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 32, 64, 16)
+
+[node name="Platform13" type="StaticBody2D" parent="."]
+position = Vector2(1750, 130)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform13"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform13"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="Platform14" type="StaticBody2D" parent="."]
+position = Vector2(1880, 100)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform14"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform14"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 48, 64, 16)
+
+[node name="Platform15" type="StaticBody2D" parent="."]
+position = Vector2(2000, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform15"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform15"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="Platform16" type="StaticBody2D" parent="."]
+position = Vector2(2140, 90)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform16"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform16"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 32, 64, 16)
+
+[node name="Platform17" type="StaticBody2D" parent="."]
+position = Vector2(2280, 70)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform17"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform17"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 48, 64, 16)
+
+[node name="Platform18" type="StaticBody2D" parent="."]
+position = Vector2(2420, 100)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform18"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform18"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="Platform19" type="StaticBody2D" parent="."]
+position = Vector2(2560, 130)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform19"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform19"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 32, 64, 16)
+
+[node name="Platform20" type="StaticBody2D" parent="."]
+position = Vector2(2700, 90)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform20"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform20"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 48, 64, 16)
+
+[node name="Platform21" type="StaticBody2D" parent="."]
+position = Vector2(2820, 60)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform21"]
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Platform21"]
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(0, 16, 64, 16)
+
+[node name="TowerLeftWall" type="StaticBody2D" parent="."]
+position = Vector2(1280, 112)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TowerLeftWall"]
+shape = SubResource("RectangleShape2D_wall_tall")
+
+[node name="Sprite2D" type="Sprite2D" parent="TowerLeftWall"]
+position = Vector2(0, 16)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(24, 0, 16, 64)
+
+[node name="TowerRightWall" type="StaticBody2D" parent="."]
+position = Vector2(1370, 112)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TowerRightWall"]
+shape = SubResource("RectangleShape2D_wall_tall")
+
+[node name="Sprite2D" type="Sprite2D" parent="TowerRightWall"]
+position = Vector2(0, 16)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(24, 0, 16, 64)
+
+[node name="Slime8" parent="." instance=ExtResource("3_slime")]
+position = Vector2(1100, 148)
+
+[node name="Slime9" parent="." instance=ExtResource("3_slime")]
+position = Vector2(1320, 58)
+
+[node name="Slime10" parent="." instance=ExtResource("3_slime")]
+position = Vector2(1500, 148)
+
+[node name="Slime11" parent="." instance=ExtResource("4_slime_purple")]
+position = Vector2(1620, 90)
+is_floating = true
+
+[node name="Slime12" parent="." instance=ExtResource("3_slime")]
+position = Vector2(1850, 148)
+
+[node name="Slime13" parent="." instance=ExtResource("4_slime_purple")]
+position = Vector2(2050, 148)
+
+[node name="Slime14" parent="." instance=ExtResource("4_slime_purple")]
+position = Vector2(2200, 100)
+is_floating = true
+
+[node name="Slime15" parent="." instance=ExtResource("3_slime")]
+position = Vector2(2420, 148)
+
+[node name="Slime16" parent="." instance=ExtResource("4_slime_purple")]
+position = Vector2(2600, 148)
+
+[node name="Slime17" parent="." instance=ExtResource("4_slime_purple")]
+position = Vector2(2820, 48)
