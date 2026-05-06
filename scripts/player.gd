@@ -162,6 +162,20 @@ func _physics_process(delta: float) -> void:
 		_update_floor_tracking()
 		return
 
+	if not on_floor and not _hanging and input_dir != 0.0:
+		var ray_ledge: Dictionary = _try_raycast_ledge(input_dir)
+		if ray_ledge.hit:
+			_hanging = true
+			var rt: float = ray_ledge.top_y
+			var rn: float = ray_ledge.normal_x
+			_hang_top_y = rt
+			_hang_normal_x = rn
+			global_position.y = rt + COLLISION_TOP_FROM_CENTER
+			velocity = Vector2.ZERO
+			move_and_slide()
+			_update_floor_tracking()
+			return
+
 	if on_floor:
 		_coyote_timer = COYOTE_TIME
 		_wall_stick_left = WALL_STICK_TIME
@@ -266,6 +280,39 @@ func _classify_wall_contact() -> Dictionary:
 		else:
 			result.type = "platform_side"
 		return result
+	return result
+
+
+func _try_raycast_ledge(input_dir: float) -> Dictionary:
+	var result := {"hit": false, "top_y": 0.0, "normal_x": 0.0}
+	if input_dir == 0.0:
+		return result
+	var space := get_world_2d().direct_space_state
+	var origin: Vector2 = global_position + Vector2(0.0, -COLLISION_TOP_FROM_CENTER + 4.0)
+	var target: Vector2 = origin + Vector2(input_dir * 14.0, 0.0)
+	var query := PhysicsRayQueryParameters2D.create(origin, target)
+	query.exclude = [self]
+	query.collide_with_areas = false
+	var hit: Dictionary = space.intersect_ray(query)
+	if hit.is_empty():
+		return result
+	var collider: Object = hit.collider
+	var collider_node: Node = collider as Node
+	if collider_node == null:
+		return result
+	var info: Dictionary = _shape_info(collider_node)
+	var size_x: float = info.size_x
+	var size_y: float = info.size_y
+	if size_y > size_x:
+		return result
+	var top_y: float = info.top_y
+	var player_top: float = global_position.y - COLLISION_TOP_FROM_CENTER
+	if absf(player_top - top_y) > LEDGE_GRAB_TOLERANCE:
+		return result
+	var hit_normal: Vector2 = hit.normal
+	result.hit = true
+	result.top_y = top_y
+	result.normal_x = hit_normal.x
 	return result
 
 
