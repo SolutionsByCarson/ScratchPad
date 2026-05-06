@@ -23,9 +23,9 @@ const SLAM_SPEED := 500.0
 const SLAM_RADIUS := 36.0
 const SLAM_LAND_DURATION := 0.18
 
-const DASH_SCALE := Vector2(1.25, 0.85)
-const SLAM_DESCENT_SCALE := Vector2(0.8, 1.25)
-const SLAM_LAND_SCALE := Vector2(1.35, 0.7)
+const DASH_SCALE := Vector2(1.45, 0.7)
+const SLAM_DESCENT_SCALE := Vector2(0.65, 1.45)
+const SLAM_LAND_SCALE := Vector2(1.55, 0.55)
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, 2.0)

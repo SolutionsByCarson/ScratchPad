@@ -10,6 +10,8 @@ size = Vector2(12, 18)
 script = ExtResource("1_player")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, 16)
+offset = Vector2(0, -16)
 texture = ExtResource("2_knight")
 region_enabled = true
 region_rect = Rect2(0, 0, 32, 32)
