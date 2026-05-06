@@ -15,11 +15,18 @@ const WALL_JUMP_PUSH_X := 220.0
 const WALL_JUMP_VELOCITY := -300.0
 const WALL_JUMP_INPUT_LOCK := 0.15
 
+const LEDGE_GRAB_TOLERANCE := 10.0
+const MANTLE_NUDGE_X := 12.0
+
 const SLAM_SPEED := 500.0
 const SLAM_RADIUS := 36.0
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, 2.0)
+
+const COLLISION_HALF_HEIGHT := 9.0
+const COLLISION_OFFSET_Y := 2.0
+const COLLISION_TOP_FROM_CENTER := COLLISION_HALF_HEIGHT - COLLISION_OFFSET_Y  # 7.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -31,6 +38,9 @@ var _dash_cooldown_left := 0.0
 var _wall_stick_left := WALL_STICK_TIME
 var _wall_jump_lock_left := 0.0
 var _slamming := false
+var _hanging := false
+var _hang_top_y := 0.0
+var _hang_normal_x := 0.0
 
 
 func _ready() -> void:
@@ -57,6 +67,7 @@ func _physics_process(delta: float) -> void:
 
 	if not is_on_floor() and not _slamming and Input.is_action_just_pressed("slam"):
 		_slamming = true
+		_hanging = false
 		velocity.x = 0.0
 		velocity.y = SLAM_SPEED
 
@@ -70,14 +81,38 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 			return
 
+	if _hanging:
+		velocity = Vector2.ZERO
+		var input_dir_h := Input.get_axis("move_left", "move_right")
+		if Input.is_action_just_pressed("jump"):
+			global_position.y = _hang_top_y - COLLISION_HALF_HEIGHT - COLLISION_OFFSET_Y
+			global_position.x += -_hang_normal_x * MANTLE_NUDGE_X
+			_hanging = false
+			Audio.play_sfx("jump")
+		elif input_dir_h != 0.0 and signf(input_dir_h) == signf(_hang_normal_x):
+			_hanging = false
+		move_and_slide()
+		return
+
 	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
 
 	var input_dir := Input.get_axis("move_left", "move_right")
 	var on_floor := is_on_floor()
-	var on_wall := is_on_wall_only()
-	var wall_normal := get_wall_normal()
-	var pressing_into_wall := on_wall and input_dir != 0.0 and signf(input_dir) != signf(wall_normal.x)
-	var wall_clinging := pressing_into_wall and velocity.y >= 0.0
+	var contact := _classify_wall_contact()
+	var on_vertical_wall := contact.type == "wall"
+	var on_ledge := contact.type == "ledge"
+	var contact_normal_x: float = contact.normal_x
+	var pressing_into_contact := contact_normal_x != 0.0 and input_dir != 0.0 and signf(input_dir) != signf(contact_normal_x)
+	var wall_clinging := on_vertical_wall and pressing_into_contact and velocity.y >= 0.0
+
+	if on_ledge and pressing_into_contact and not on_floor:
+		_hanging = true
+		_hang_top_y = contact.top_y
+		_hang_normal_x = contact_normal_x
+		global_position.y = contact.top_y + COLLISION_TOP_FROM_CENTER
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
 
 	if on_floor:
 		_coyote_timer = COYOTE_TIME
@@ -93,7 +128,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity += get_gravity() * delta
 		_coyote_timer -= delta
-		if not on_wall:
+		if not on_vertical_wall:
 			_wall_stick_left = WALL_STICK_TIME
 
 	if Input.is_action_just_pressed("jump"):
@@ -101,12 +136,12 @@ func _physics_process(delta: float) -> void:
 	else:
 		_jump_buffer_timer -= delta
 
-	if _jump_buffer_timer > 0.0 and not on_floor and on_wall:
-		velocity.x = wall_normal.x * WALL_JUMP_PUSH_X
+	if _jump_buffer_timer > 0.0 and not on_floor and on_vertical_wall:
+		velocity.x = contact_normal_x * WALL_JUMP_PUSH_X
 		velocity.y = WALL_JUMP_VELOCITY
 		_wall_jump_lock_left = WALL_JUMP_INPUT_LOCK
-		_facing = wall_normal.x
-		sprite.flip_h = wall_normal.x < 0.0
+		_facing = contact_normal_x
+		sprite.flip_h = contact_normal_x < 0.0
 		_jump_buffer_timer = 0.0
 		_wall_stick_left = WALL_STICK_TIME
 		Audio.play_sfx("jump")
@@ -125,6 +160,52 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0.0, SPEED)
 
 	move_and_slide()
+
+
+func _classify_wall_contact() -> Dictionary:
+	var result := {"type": "none", "normal_x": 0.0, "top_y": 0.0}
+	if not is_on_wall_only():
+		return result
+	for i in range(get_slide_collision_count()):
+		var collision := get_slide_collision(i)
+		var n: Vector2 = collision.get_normal()
+		if absf(n.x) <= 0.7:
+			continue
+		var collider: Object = collision.get_collider()
+		if collider == null:
+			continue
+		var collider_node: Node = collider as Node
+		if collider_node == null:
+			continue
+		var info := _shape_info(collider_node)
+		result.normal_x = n.x
+		if info.size_y > info.size_x:
+			result.type = "wall"
+			return result
+		var player_top: float = global_position.y - COLLISION_TOP_FROM_CENTER
+		if absf(player_top - info.top_y) <= LEDGE_GRAB_TOLERANCE:
+			result.type = "ledge"
+			result.top_y = info.top_y
+		else:
+			result.type = "platform_side"
+		return result
+	return result
+
+
+func _shape_info(node: Node) -> Dictionary:
+	var info := {"size_x": 0.0, "size_y": 0.0, "top_y": INF}
+	for child in node.get_children():
+		if child is CollisionShape2D:
+			var cs: CollisionShape2D = child
+			if cs.shape is RectangleShape2D:
+				var rect: RectangleShape2D = cs.shape
+				info.size_x = rect.size.x
+				info.size_y = rect.size.y
+				if node is Node2D:
+					var n2d: Node2D = node
+					info.top_y = n2d.global_position.y + cs.position.y - rect.size.y / 2.0
+			break
+	return info
 
 
 func _shoot() -> void:
