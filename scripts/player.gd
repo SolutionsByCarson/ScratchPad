@@ -64,6 +64,19 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_update_visual_scale(delta)
 
+	if _hanging:
+		velocity = Vector2.ZERO
+		if Input.is_action_just_pressed("jump"):
+			global_position.y = _hang_top_y - COLLISION_BOTTOM_FROM_CENTER
+			global_position.x += -_hang_normal_x * MANTLE_NUDGE_X
+			_hanging = false
+			Audio.play_sfx("jump")
+		elif Input.is_action_just_pressed("slam"):
+			_hanging = false
+		move_and_slide()
+		_update_floor_tracking()
+		return
+
 	if Input.is_action_just_pressed("shoot"):
 		_shoot()
 
@@ -104,19 +117,6 @@ func _physics_process(delta: float) -> void:
 			_update_floor_tracking()
 			return
 
-	if _hanging:
-		velocity = Vector2.ZERO
-		var input_dir_h := Input.get_axis("move_left", "move_right")
-		if Input.is_action_just_pressed("jump"):
-			global_position.y = _hang_top_y - COLLISION_BOTTOM_FROM_CENTER
-			global_position.x += -_hang_normal_x * MANTLE_NUDGE_X
-			_hanging = false
-			Audio.play_sfx("jump")
-		elif input_dir_h != 0.0 and signf(input_dir_h) == signf(_hang_normal_x):
-			_hanging = false
-		move_and_slide()
-		_update_floor_tracking()
-		return
 
 	if _was_on_floor and not is_on_floor() and velocity.y >= -10.0:
 		var hspeed: float = absf(velocity.x)
