@@ -17,9 +17,15 @@ const WALL_JUMP_INPUT_LOCK := 0.15
 
 const LEDGE_GRAB_TOLERANCE := 10.0
 const MANTLE_NUDGE_X := 12.0
+const AUTO_HANG_MAX_SPEED := 80.0
 
 const SLAM_SPEED := 500.0
 const SLAM_RADIUS := 36.0
+const SLAM_LAND_DURATION := 0.18
+
+const DASH_SCALE := Vector2(1.25, 0.85)
+const SLAM_DESCENT_SCALE := Vector2(0.8, 1.25)
+const SLAM_LAND_SCALE := Vector2(1.35, 0.7)
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, 2.0)
@@ -27,6 +33,7 @@ const SHOOT_OFFSET := Vector2(12.0, 2.0)
 const COLLISION_HALF_HEIGHT := 9.0
 const COLLISION_OFFSET_Y := 2.0
 const COLLISION_TOP_FROM_CENTER := COLLISION_HALF_HEIGHT - COLLISION_OFFSET_Y  # 7.0
+const COLLISION_BOTTOM_FROM_CENTER := COLLISION_HALF_HEIGHT + COLLISION_OFFSET_Y  # 11.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -38,9 +45,12 @@ var _dash_cooldown_left := 0.0
 var _wall_stick_left := WALL_STICK_TIME
 var _wall_jump_lock_left := 0.0
 var _slamming := false
+var _slam_land_timer := 0.0
 var _hanging := false
 var _hang_top_y := 0.0
 var _hang_normal_x := 0.0
+var _was_on_floor := false
+var _last_floor_top_y := 0.0
 
 
 func _ready() -> void:
@@ -48,6 +58,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_update_visual_scale(delta)
+
 	if Input.is_action_just_pressed("shoot"):
 		_shoot()
 
@@ -63,6 +75,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = _facing * DASH_SPEED
 		velocity.y = 0.0
 		move_and_slide()
+		_update_floor_tracking()
 		return
 
 	if not is_on_floor() and not _slamming and Input.is_action_just_pressed("slam"):
@@ -74,25 +87,41 @@ func _physics_process(delta: float) -> void:
 	if _slamming:
 		if is_on_floor():
 			_slamming = false
+			_slam_land_timer = SLAM_LAND_DURATION
+			Audio.play_sfx("explosion")
 			_do_slam_damage()
 		else:
 			velocity += get_gravity() * delta
 			velocity.x = 0.0
 			move_and_slide()
+			_update_floor_tracking()
 			return
 
 	if _hanging:
 		velocity = Vector2.ZERO
 		var input_dir_h := Input.get_axis("move_left", "move_right")
 		if Input.is_action_just_pressed("jump"):
-			global_position.y = _hang_top_y - COLLISION_HALF_HEIGHT - COLLISION_OFFSET_Y
+			global_position.y = _hang_top_y - COLLISION_BOTTOM_FROM_CENTER
 			global_position.x += -_hang_normal_x * MANTLE_NUDGE_X
 			_hanging = false
 			Audio.play_sfx("jump")
 		elif input_dir_h != 0.0 and signf(input_dir_h) == signf(_hang_normal_x):
 			_hanging = false
 		move_and_slide()
+		_update_floor_tracking()
 		return
+
+	if _was_on_floor and not is_on_floor() and velocity.y >= -10.0:
+		var hspeed: float = absf(velocity.x)
+		if hspeed > 0.0 and hspeed < AUTO_HANG_MAX_SPEED:
+			_hanging = true
+			_hang_top_y = _last_floor_top_y
+			_hang_normal_x = signf(velocity.x)
+			global_position.y = _last_floor_top_y + COLLISION_TOP_FROM_CENTER
+			velocity = Vector2.ZERO
+			move_and_slide()
+			_update_floor_tracking()
+			return
 
 	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
 
@@ -114,6 +143,7 @@ func _physics_process(delta: float) -> void:
 		global_position.y = ledge_top + COLLISION_TOP_FROM_CENTER
 		velocity = Vector2.ZERO
 		move_and_slide()
+		_update_floor_tracking()
 		return
 
 	if on_floor:
@@ -162,6 +192,25 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, 0.0, SPEED)
 
 	move_and_slide()
+	_update_floor_tracking()
+
+
+func _update_visual_scale(delta: float) -> void:
+	_slam_land_timer = max(0.0, _slam_land_timer - delta)
+	if _slam_land_timer > 0.0:
+		sprite.scale = SLAM_LAND_SCALE
+	elif _slamming:
+		sprite.scale = SLAM_DESCENT_SCALE
+	elif _dash_time_left > 0.0:
+		sprite.scale = DASH_SCALE
+	else:
+		sprite.scale = Vector2.ONE
+
+
+func _update_floor_tracking() -> void:
+	_was_on_floor = is_on_floor()
+	if _was_on_floor:
+		_last_floor_top_y = global_position.y + COLLISION_BOTTOM_FROM_CENTER
 
 
 func _classify_wall_contact() -> Dictionary:
@@ -222,14 +271,8 @@ func _shoot() -> void:
 
 
 func _do_slam_damage() -> void:
-	var hit_any := false
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D:
 			var e: Node2D = enemy
 			if global_position.distance_to(e.global_position) <= SLAM_RADIUS:
 				e.queue_free()
-				hit_any = true
-	if hit_any:
-		Audio.play_sfx("explosion")
-	else:
-		Audio.play_sfx("tap")
