@@ -13,8 +13,7 @@ const JUMP_ATTACK_DISTANCE := 56.0
 const JUMP_VELOCITY_X := 110.0
 const JUMP_VELOCITY_Y := -180.0
 const GRAVITY := 600.0
-const JUMP_AIR_TIME := 2.0 * 180.0 / 600.0  # 0.6s — time from launch to landing
-const JUMP_LANDING_DISTANCE := JUMP_VELOCITY_X * JUMP_AIR_TIME  # ~66px horizontal
+const GROUND_OFFSET := 12.0  # slime center y + this = floor surface y
 const WIND_UP_DURATION := 0.35
 const LAND_RECOVER_DURATION := 0.25
 const WORLD_MIN_X := 16.0
@@ -74,16 +73,11 @@ func _process(delta: float) -> void:
 				_state = State.WANDER
 				_pick_new_wander_direction()
 			elif absf(dx) < JUMP_ATTACK_DISTANCE:
-				var prospective_dir: float = signf(dx) if dx != 0.0 else _facing_sign()
-				var landing_x: float = position.x + prospective_dir * JUMP_LANDING_DISTANCE
-				if is_floating or _has_ground_at(landing_x):
-					_state = State.WIND_UP
-					_state_timer = WIND_UP_DURATION
-					_jump_dir = prospective_dir
-					if _jump_dir != 0.0:
-						sprite.flip_h = _jump_dir < 0.0
-				else:
-					_do_chase(delta, dx)
+				_state = State.WIND_UP
+				_state_timer = WIND_UP_DURATION
+				_jump_dir = signf(dx) if dx != 0.0 else _facing_sign()
+				if _jump_dir != 0.0:
+					sprite.flip_h = _jump_dir < 0.0
 			else:
 				_do_chase(delta, dx)
 		State.WIND_UP:
@@ -95,11 +89,15 @@ func _process(delta: float) -> void:
 			position.x += _jump_dir * JUMP_VELOCITY_X * delta
 			_velocity_y += GRAVITY * delta
 			position.y += _velocity_y * delta
-			if _velocity_y > 0.0 and position.y >= _initial_y:
-				position.y = _initial_y
-				_velocity_y = 0.0
-				_state = State.LAND
-				_state_timer = LAND_RECOVER_DURATION
+			if _velocity_y > 0.0:
+				var ground_y: float = _ground_y_below(position.x, position.y - 8.0)
+				if ground_y != INF and position.y + GROUND_OFFSET >= ground_y:
+					position.y = ground_y - GROUND_OFFSET
+					_velocity_y = 0.0
+					_initial_x = position.x
+					_initial_y = position.y
+					_state = State.LAND
+					_state_timer = LAND_RECOVER_DURATION
 		State.LAND:
 			_state_timer -= delta
 			if _state_timer <= 0.0:
@@ -158,6 +156,19 @@ func _has_ground_at(x: float) -> bool:
 	query.collide_with_areas = false
 	var hit: Dictionary = space.intersect_ray(query)
 	return not hit.is_empty()
+
+
+func _ground_y_below(x: float, from_y: float) -> float:
+	var space := get_world_2d().direct_space_state
+	var origin: Vector2 = Vector2(x, from_y)
+	var target: Vector2 = origin + Vector2(0.0, 800.0)
+	var query := PhysicsRayQueryParameters2D.create(origin, target)
+	query.collide_with_areas = false
+	var hit: Dictionary = space.intersect_ray(query)
+	if hit.is_empty():
+		return INF
+	var hit_pos: Vector2 = hit.position
+	return hit_pos.y
 
 
 func _pick_new_wander_direction() -> void:
