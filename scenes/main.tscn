@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dygkjirhqc1mn"]
+[gd_scene load_steps=13 format=3 uid="uid://dygkjirhqc1mn"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://d28c8ru4hi4ii" path="res://assets/sprites/platforms.png" id="2_platforms"]
@@ -8,11 +8,23 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(2880, 16)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_short"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_LeftEdgeWall"]
 size = Vector2(16, 64)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_tall"]
-size = Vector2(16, 182.5)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_RightEdgeWall"]
+size = Vector2(16, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_TallWall"]
+size = Vector2(16, 190.375)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_TallWall2"]
+size = Vector2(16, 190.375)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_TowerLeftWall"]
+size = Vector2(16, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_TowerRightWall"]
+size = Vector2(16, 96)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
 size = Vector2(48.25, 9)
@@ -300,7 +312,7 @@ region_rect = Rect2(0, 0, 64, 16)
 position = Vector2(8, 128)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftEdgeWall"]
-shape = SubResource("RectangleShape2D_wall_short")
+shape = SubResource("RectangleShape2D_LeftEdgeWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="LeftEdgeWall"]
 texture = ExtResource("2_platforms")
@@ -311,7 +323,7 @@ region_rect = Rect2(24, 0, 16, 64)
 position = Vector2(2872, 128)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightEdgeWall"]
-shape = SubResource("RectangleShape2D_wall_short")
+shape = SubResource("RectangleShape2D_RightEdgeWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="RightEdgeWall"]
 texture = ExtResource("2_platforms")
@@ -322,8 +334,8 @@ region_rect = Rect2(24, 0, 16, 64)
 position = Vector2(487, 111)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TallWall"]
-position = Vector2(0, -48.5)
-shape = SubResource("RectangleShape2D_wall_tall")
+position = Vector2(0, -46.1875)
+shape = SubResource("RectangleShape2D_TallWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="TallWall"]
 position = Vector2(0, 16)
@@ -461,9 +473,9 @@ J shoot  S/Down slam  hold into wall to cling"
 [node name="Tall Wall" type="StaticBody2D" parent="."]
 position = Vector2(420, 69)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Tall Wall"]
-position = Vector2(0, -48.5)
-shape = SubResource("RectangleShape2D_wall_tall")
+[node name="CollisionShape2Db" type="CollisionShape2D" parent="Tall Wall"]
+position = Vector2(0, -52.875)
+shape = SubResource("RectangleShape2D_TallWall2")
 
 [node name="Sprite2D" type="Sprite2D" parent="Tall Wall"]
 position = Vector2(0, 16)
@@ -487,6 +499,7 @@ region_rect = Rect2(24, 0, 16, 64)
 position = Vector2(1040, 130)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform8"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -499,6 +512,7 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(1180, 100)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform9"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -511,6 +525,7 @@ region_rect = Rect2(0, 32, 64, 16)
 position = Vector2(1320, 70)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform10"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -523,6 +538,7 @@ region_rect = Rect2(0, 48, 64, 16)
 position = Vector2(1460, 110)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform11"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -535,6 +551,7 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(1600, 80)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform12"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -547,6 +564,7 @@ region_rect = Rect2(0, 32, 64, 16)
 position = Vector2(1750, 130)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform13"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -559,6 +577,7 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(1880, 100)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform14"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -571,6 +590,7 @@ region_rect = Rect2(0, 48, 64, 16)
 position = Vector2(2000, 120)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform15"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -583,6 +603,7 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(2140, 90)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform16"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -595,6 +616,7 @@ region_rect = Rect2(0, 32, 64, 16)
 position = Vector2(2280, 70)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform17"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -607,6 +629,7 @@ region_rect = Rect2(0, 48, 64, 16)
 position = Vector2(2420, 100)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform18"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -619,6 +642,7 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(2560, 130)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform19"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -631,6 +655,7 @@ region_rect = Rect2(0, 32, 64, 16)
 position = Vector2(2700, 90)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform20"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -643,6 +668,7 @@ region_rect = Rect2(0, 48, 64, 16)
 position = Vector2(2820, 60)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform21"]
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -655,7 +681,8 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(1280, 112)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TowerLeftWall"]
-shape = SubResource("RectangleShape2D_wall_tall")
+position = Vector2(0, 16)
+shape = SubResource("RectangleShape2D_TowerLeftWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="TowerLeftWall"]
 position = Vector2(0, 16)
@@ -667,7 +694,8 @@ region_rect = Rect2(24, 0, 16, 64)
 position = Vector2(1370, 112)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TowerRightWall"]
-shape = SubResource("RectangleShape2D_wall_tall")
+position = Vector2(0, 15.5)
+shape = SubResource("RectangleShape2D_TowerRightWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="TowerRightWall"]
 position = Vector2(0, 16)
@@ -679,7 +707,7 @@ region_rect = Rect2(24, 0, 16, 64)
 position = Vector2(1100, 148)
 
 [node name="Slime9" parent="." instance=ExtResource("3_slime")]
-position = Vector2(1320, 58)
+position = Vector2(1310, 39)
 
 [node name="Slime10" parent="." instance=ExtResource("3_slime")]
 position = Vector2(1500, 148)
@@ -705,4 +733,4 @@ position = Vector2(2420, 148)
 position = Vector2(2600, 148)
 
 [node name="Slime17" parent="." instance=ExtResource("4_slime_purple")]
-position = Vector2(2820, 48)
+position = Vector2(2819, 39)
