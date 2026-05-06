@@ -55,6 +55,8 @@ var _last_floor_top_y := 0.0
 var _ignore_wall_normal_x := 0.0
 var _wall_grace_left := 0.0
 var _last_wall_normal_x := 0.0
+var _wall_attached := false
+var _wall_attached_normal_x := 0.0
 
 
 func _ready() -> void:
@@ -79,12 +81,43 @@ func _physics_process(delta: float) -> void:
 		_update_floor_tracking()
 		return
 
-	if Input.is_action_just_pressed("shoot"):
+	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
+	if _wall_jump_lock_left <= 0.0:
+		_ignore_wall_normal_x = 0.0
+
+	var input_dir := Input.get_axis("move_left", "move_right")
+	var on_floor := is_on_floor()
+	var contact: Dictionary = _classify_wall_contact()
+	var contact_type: String = contact.type
+	var on_vertical_wall: bool = contact_type == "wall"
+	var on_ledge: bool = contact_type == "ledge"
+	var contact_normal_x: float = contact.normal_x
+	if on_vertical_wall and _ignore_wall_normal_x != 0.0 and signf(contact_normal_x) != signf(_ignore_wall_normal_x):
+		_ignore_wall_normal_x = 0.0
+	if on_vertical_wall:
+		_wall_grace_left = WALL_GRACE_TIME
+		_last_wall_normal_x = contact_normal_x
+	else:
+		_wall_grace_left = max(0.0, _wall_grace_left - delta)
+	var pressing_into_contact: bool = contact_normal_x != 0.0 and input_dir != 0.0 and signf(input_dir) != signf(contact_normal_x)
+	var wall_clinging: bool = on_vertical_wall and pressing_into_contact and velocity.y >= 0.0
+
+	if wall_clinging:
+		_wall_attached = true
+		_wall_attached_normal_x = contact_normal_x
+	if on_floor:
+		_wall_attached = false
+	elif not on_vertical_wall:
+		_wall_attached = false
+	elif _wall_attached and signf(contact_normal_x) != signf(_wall_attached_normal_x):
+		_wall_attached = false
+
+	if not _wall_attached and Input.is_action_just_pressed("shoot"):
 		_shoot()
 
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
 
-	if Input.is_action_just_pressed("dash") and _dash_cooldown_left <= 0.0 and _dash_time_left <= 0.0:
+	if not _wall_attached and Input.is_action_just_pressed("dash") and _dash_cooldown_left <= 0.0 and _dash_time_left <= 0.0:
 		_dash_time_left = DASH_DURATION
 		_dash_cooldown_left = DASH_COOLDOWN
 		Audio.play_sfx("power_up")
@@ -132,27 +165,6 @@ func _physics_process(delta: float) -> void:
 			_update_floor_tracking()
 			return
 
-	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
-	if _wall_jump_lock_left <= 0.0:
-		_ignore_wall_normal_x = 0.0
-
-	var input_dir := Input.get_axis("move_left", "move_right")
-	var on_floor := is_on_floor()
-	var contact: Dictionary = _classify_wall_contact()
-	var contact_type: String = contact.type
-	var on_vertical_wall: bool = contact_type == "wall"
-	var on_ledge: bool = contact_type == "ledge"
-	var contact_normal_x: float = contact.normal_x
-	if on_vertical_wall and _ignore_wall_normal_x != 0.0 and signf(contact_normal_x) != signf(_ignore_wall_normal_x):
-		_ignore_wall_normal_x = 0.0
-	if on_vertical_wall:
-		_wall_grace_left = WALL_GRACE_TIME
-		_last_wall_normal_x = contact_normal_x
-	else:
-		_wall_grace_left = max(0.0, _wall_grace_left - delta)
-	var pressing_into_contact: bool = contact_normal_x != 0.0 and input_dir != 0.0 and signf(input_dir) != signf(contact_normal_x)
-	var wall_clinging: bool = on_vertical_wall and pressing_into_contact and velocity.y >= 0.0
-
 	if on_ledge and pressing_into_contact and not on_floor:
 		_hanging = true
 		var ledge_top: float = contact.top_y
@@ -181,11 +193,11 @@ func _physics_process(delta: float) -> void:
 	if on_floor:
 		_coyote_timer = COYOTE_TIME
 		_wall_stick_left = WALL_STICK_TIME
-	elif wall_clinging and _wall_stick_left > 0.0:
+	elif _wall_attached and _wall_stick_left > 0.0:
 		velocity.y = 0.0
 		_wall_stick_left -= delta
 		_coyote_timer = 0.0
-	elif wall_clinging:
+	elif _wall_attached:
 		velocity += get_gravity() * delta
 		velocity.y = min(velocity.y, WALL_SLIDE_MAX_FALL)
 		_coyote_timer = 0.0
@@ -208,6 +220,7 @@ func _physics_process(delta: float) -> void:
 		_wall_jump_lock_left = WALL_JUMP_INPUT_LOCK
 		_ignore_wall_normal_x = jump_normal_x
 		_wall_grace_left = 0.0
+		_wall_attached = false
 		_facing = jump_normal_x
 		sprite.flip_h = jump_normal_x < 0.0
 		_jump_buffer_timer = 0.0
@@ -219,7 +232,7 @@ func _physics_process(delta: float) -> void:
 		_coyote_timer = 0.0
 		Audio.play_sfx("jump")
 
-	if _wall_jump_lock_left <= 0.0:
+	if not _wall_attached and _wall_jump_lock_left <= 0.0:
 		if input_dir != 0.0:
 			velocity.x = input_dir * SPEED
 			sprite.flip_h = input_dir < 0.0
