@@ -87,6 +87,9 @@ func _physics_process(delta: float) -> void:
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
 
 	if not _wall_attached and Input.is_action_just_pressed("dash") and _dash_cooldown_left <= 0.0 and _dash_time_left <= 0.0:
+		if input_dir != 0.0:
+			_facing = input_dir
+			sprite.flip_h = input_dir < 0.0
 		_dash_time_left = DASH_DURATION
 		_dash_cooldown_left = DASH_COOLDOWN
 		Audio.play_sfx("power_up")
