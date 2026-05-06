@@ -13,7 +13,8 @@ const WALL_STICK_TIME := 0.20
 const WALL_SLIDE_MAX_FALL := 80.0
 const WALL_JUMP_PUSH_X := 220.0
 const WALL_JUMP_VELOCITY := -300.0
-const WALL_JUMP_INPUT_LOCK := 0.15
+const WALL_JUMP_INPUT_LOCK := 0.22
+const WALL_GRACE_TIME := 0.06
 
 const LEDGE_GRAB_TOLERANCE := 10.0
 const MANTLE_NUDGE_X := 12.0
@@ -51,6 +52,9 @@ var _hang_top_y := 0.0
 var _hang_normal_x := 0.0
 var _was_on_floor := false
 var _last_floor_top_y := 0.0
+var _ignore_wall_normal_x := 0.0
+var _wall_grace_left := 0.0
+var _last_wall_normal_x := 0.0
 
 
 func _ready() -> void:
@@ -124,6 +128,8 @@ func _physics_process(delta: float) -> void:
 			return
 
 	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
+	if _wall_jump_lock_left <= 0.0:
+		_ignore_wall_normal_x = 0.0
 
 	var input_dir := Input.get_axis("move_left", "move_right")
 	var on_floor := is_on_floor()
@@ -132,6 +138,13 @@ func _physics_process(delta: float) -> void:
 	var on_vertical_wall: bool = contact_type == "wall"
 	var on_ledge: bool = contact_type == "ledge"
 	var contact_normal_x: float = contact.normal_x
+	if on_vertical_wall and _ignore_wall_normal_x != 0.0 and signf(contact_normal_x) != signf(_ignore_wall_normal_x):
+		_ignore_wall_normal_x = 0.0
+	if on_vertical_wall:
+		_wall_grace_left = WALL_GRACE_TIME
+		_last_wall_normal_x = contact_normal_x
+	else:
+		_wall_grace_left = max(0.0, _wall_grace_left - delta)
 	var pressing_into_contact: bool = contact_normal_x != 0.0 and input_dir != 0.0 and signf(input_dir) != signf(contact_normal_x)
 	var wall_clinging: bool = on_vertical_wall and pressing_into_contact and velocity.y >= 0.0
 
@@ -168,12 +181,16 @@ func _physics_process(delta: float) -> void:
 	else:
 		_jump_buffer_timer -= delta
 
-	if _jump_buffer_timer > 0.0 and not on_floor and on_vertical_wall:
-		velocity.x = contact_normal_x * WALL_JUMP_PUSH_X
+	var can_wall_jump: bool = not on_floor and (on_vertical_wall or _wall_grace_left > 0.0)
+	var jump_normal_x: float = contact_normal_x if on_vertical_wall else _last_wall_normal_x
+	if _jump_buffer_timer > 0.0 and can_wall_jump and jump_normal_x != 0.0:
+		velocity.x = jump_normal_x * WALL_JUMP_PUSH_X
 		velocity.y = WALL_JUMP_VELOCITY
 		_wall_jump_lock_left = WALL_JUMP_INPUT_LOCK
-		_facing = contact_normal_x
-		sprite.flip_h = contact_normal_x < 0.0
+		_ignore_wall_normal_x = jump_normal_x
+		_wall_grace_left = 0.0
+		_facing = jump_normal_x
+		sprite.flip_h = jump_normal_x < 0.0
 		_jump_buffer_timer = 0.0
 		_wall_stick_left = WALL_STICK_TIME
 		Audio.play_sfx("jump")
@@ -232,10 +249,13 @@ func _classify_wall_contact() -> Dictionary:
 		var size_x: float = info.size_x
 		var size_y: float = info.size_y
 		var top_y: float = info.top_y
-		result.normal_x = n.x
 		if size_y > size_x:
+			if _ignore_wall_normal_x != 0.0 and signf(n.x) == signf(_ignore_wall_normal_x):
+				continue
+			result.normal_x = n.x
 			result.type = "wall"
 			return result
+		result.normal_x = n.x
 		var player_top: float = global_position.y - COLLISION_TOP_FROM_CENTER
 		if absf(player_top - top_y) <= LEDGE_GRAB_TOLERANCE:
 			result.type = "ledge"
