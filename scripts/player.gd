@@ -98,18 +98,20 @@ func _physics_process(delta: float) -> void:
 
 	var input_dir := Input.get_axis("move_left", "move_right")
 	var on_floor := is_on_floor()
-	var contact := _classify_wall_contact()
-	var on_vertical_wall := contact.type == "wall"
-	var on_ledge := contact.type == "ledge"
+	var contact: Dictionary = _classify_wall_contact()
+	var contact_type: String = contact.type
+	var on_vertical_wall: bool = contact_type == "wall"
+	var on_ledge: bool = contact_type == "ledge"
 	var contact_normal_x: float = contact.normal_x
-	var pressing_into_contact := contact_normal_x != 0.0 and input_dir != 0.0 and signf(input_dir) != signf(contact_normal_x)
-	var wall_clinging := on_vertical_wall and pressing_into_contact and velocity.y >= 0.0
+	var pressing_into_contact: bool = contact_normal_x != 0.0 and input_dir != 0.0 and signf(input_dir) != signf(contact_normal_x)
+	var wall_clinging: bool = on_vertical_wall and pressing_into_contact and velocity.y >= 0.0
 
 	if on_ledge and pressing_into_contact and not on_floor:
 		_hanging = true
-		_hang_top_y = contact.top_y
+		var ledge_top: float = contact.top_y
+		_hang_top_y = ledge_top
 		_hang_normal_x = contact_normal_x
-		global_position.y = contact.top_y + COLLISION_TOP_FROM_CENTER
+		global_position.y = ledge_top + COLLISION_TOP_FROM_CENTER
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
@@ -177,15 +179,18 @@ func _classify_wall_contact() -> Dictionary:
 		var collider_node: Node = collider as Node
 		if collider_node == null:
 			continue
-		var info := _shape_info(collider_node)
+		var info: Dictionary = _shape_info(collider_node)
+		var size_x: float = info.size_x
+		var size_y: float = info.size_y
+		var top_y: float = info.top_y
 		result.normal_x = n.x
-		if info.size_y > info.size_x:
+		if size_y > size_x:
 			result.type = "wall"
 			return result
 		var player_top: float = global_position.y - COLLISION_TOP_FROM_CENTER
-		if absf(player_top - info.top_y) <= LEDGE_GRAB_TOLERANCE:
+		if absf(player_top - top_y) <= LEDGE_GRAB_TOLERANCE:
 			result.type = "ledge"
-			result.top_y = info.top_y
+			result.top_y = top_y
 		else:
 			result.type = "platform_side"
 		return result
