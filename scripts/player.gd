@@ -66,7 +66,9 @@ func _physics_process(delta: float) -> void:
 
 	if _hanging:
 		velocity = Vector2.ZERO
-		if Input.is_action_just_pressed("jump"):
+		var input_dir_hang := Input.get_axis("move_left", "move_right")
+		var pressing_into_ledge := input_dir_hang != 0.0 and signf(input_dir_hang) != signf(_hang_normal_x)
+		if Input.is_action_just_pressed("jump") or pressing_into_ledge:
 			global_position.y = _hang_top_y - COLLISION_BOTTOM_FROM_CENTER
 			global_position.x += -_hang_normal_x * MANTLE_NUDGE_X
 			_hanging = false
