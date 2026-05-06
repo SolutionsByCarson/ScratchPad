@@ -15,11 +15,11 @@ var _sfx_player: AudioStreamPlayer
 
 func _ready() -> void:
 	_music_player = AudioStreamPlayer.new()
-	_music_player.volume_db = -10.0
+	_music_player.volume_db = -15.0
 	add_child(_music_player)
 
 	_sfx_player = AudioStreamPlayer.new()
-	_sfx_player.volume_db = -4.0
+	_sfx_player.volume_db = -9.0
 	add_child(_sfx_player)
 
 	var music: AudioStream = load("res://assets/music/time_for_adventure.mp3")

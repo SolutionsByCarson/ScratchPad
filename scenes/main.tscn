@@ -12,7 +12,7 @@ size = Vector2(960, 16)
 size = Vector2(16, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_tall"]
-size = Vector2(16, 197)
+size = Vector2(16, 182.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
 size = Vector2(48.25, 9)
@@ -138,64 +138,27 @@ texture = ExtResource("2_platforms")
 region_enabled = true
 region_rect = Rect2(24, 0, 16, 64)
 
-[node name="ShaftLeftWall" type="StaticBody2D" parent="."]
+[node name="TallWall" type="StaticBody2D" parent="."]
 position = Vector2(487, 111)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ShaftLeftWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TallWall"]
 position = Vector2(0, -48.5)
 shape = SubResource("RectangleShape2D_wall_tall")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="ShaftLeftWall/CollisionShape2D"]
-position = Vector2(-65, -62)
-shape = SubResource("RectangleShape2D_wall_tall")
-
-[node name="Sprite2D" type="Sprite2D" parent="ShaftLeftWall"]
+[node name="Sprite2D" type="Sprite2D" parent="TallWall"]
 position = Vector2(0, 16)
 texture = ExtResource("2_platforms")
 region_enabled = true
 region_rect = Rect2(24, 0, 16, 64)
 
-[node name="Sprite2D2" type="Sprite2D" parent="ShaftLeftWall"]
-position = Vector2(-65, -49)
+[node name="Sprite2D2" type="Sprite2D" parent="TallWall"]
+position = Vector2(0, -48)
 texture = ExtResource("2_platforms")
 region_enabled = true
 region_rect = Rect2(24, 0, 16, 64)
 
-[node name="Sprite2D2" type="Sprite2D" parent="ShaftLeftWall/Sprite2D2"]
-position = Vector2(0, -64)
-texture = ExtResource("2_platforms")
-region_enabled = true
-region_rect = Rect2(24, 0, 16, 64)
-
-[node name="Sprite2D2" type="Sprite2D" parent="ShaftLeftWall/Sprite2D2/Sprite2D2"]
-position = Vector2(0, -64)
-texture = ExtResource("2_platforms")
-region_enabled = true
-region_rect = Rect2(24, 0, 16, 64)
-
-[node name="ShaftRightWall" type="StaticBody2D" parent="."]
-position = Vector2(552, 112)
-
-[node name="Sprite2D" type="Sprite2D" parent="ShaftRightWall"]
-position = Vector2(-65, -49)
-texture = ExtResource("2_platforms")
-region_enabled = true
-region_rect = Rect2(24, 0, 16, 64)
-
-[node name="Sprite2D" type="Sprite2D" parent="ShaftRightWall/Sprite2D"]
-position = Vector2(-65, -49)
-texture = ExtResource("2_platforms")
-region_enabled = true
-region_rect = Rect2(24, 0, 16, 64)
-
-[node name="Sprite2D2" type="Sprite2D" parent="ShaftRightWall/Sprite2D"]
-position = Vector2(-65, -49)
-texture = ExtResource("2_platforms")
-region_enabled = true
-region_rect = Rect2(24, 0, 16, 64)
-
-[node name="Sprite2D" type="Sprite2D" parent="ShaftRightWall/Sprite2D/Sprite2D2"]
-position = Vector2(65, -12)
+[node name="Sprite2D3" type="Sprite2D" parent="TallWall"]
+position = Vector2(0, -115)
 texture = ExtResource("2_platforms")
 region_enabled = true
 region_rect = Rect2(24, 0, 16, 64)
@@ -300,3 +263,36 @@ position = Vector2(820, 148)
 position = Vector2(240, 60)
 
 [node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Controls" type="Label" parent="HUD"]
+offset_left = 4.0
+offset_top = 2.0
+offset_right = 320.0
+offset_bottom = 40.0
+text = "A/D move  Space jump  Shift dash
+J shoot  S/Down slam  hold into wall to cling"
+
+[node name="Tall Wall" type="StaticBody2D" parent="."]
+position = Vector2(420, 69)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tall Wall"]
+position = Vector2(0, -48.5)
+shape = SubResource("RectangleShape2D_wall_tall")
+
+[node name="Sprite2D" type="Sprite2D" parent="Tall Wall"]
+position = Vector2(0, 16)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(24, 0, 16, 64)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Tall Wall"]
+position = Vector2(0, -48)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(24, 0, 16, 64)
+
+[node name="Sprite2D3" type="Sprite2D" parent="Tall Wall"]
+position = Vector2(0, -115)
+texture = ExtResource("2_platforms")
+region_enabled = true
+region_rect = Rect2(24, 0, 16, 64)
