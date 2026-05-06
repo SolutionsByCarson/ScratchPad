@@ -15,6 +15,9 @@ const WALL_JUMP_PUSH_X := 220.0
 const WALL_JUMP_VELOCITY := -300.0
 const WALL_JUMP_INPUT_LOCK := 0.15
 
+const SLAM_SPEED := 500.0
+const SLAM_RADIUS := 36.0
+
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, 2.0)
 
@@ -27,6 +30,7 @@ var _dash_time_left := 0.0
 var _dash_cooldown_left := 0.0
 var _wall_stick_left := WALL_STICK_TIME
 var _wall_jump_lock_left := 0.0
+var _slamming := false
 
 
 func _ready() -> void:
@@ -50,6 +54,21 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 		move_and_slide()
 		return
+
+	if not is_on_floor() and not _slamming and Input.is_action_just_pressed("slam"):
+		_slamming = true
+		velocity.x = 0.0
+		velocity.y = SLAM_SPEED
+
+	if _slamming:
+		if is_on_floor():
+			_slamming = false
+			_do_slam_damage()
+		else:
+			velocity += get_gravity() * delta
+			velocity.x = 0.0
+			move_and_slide()
+			return
 
 	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
 
@@ -114,3 +133,17 @@ func _shoot() -> void:
 	fruit.direction = _facing
 	get_parent().add_child(fruit)
 	Audio.play_sfx("tap")
+
+
+func _do_slam_damage() -> void:
+	var hit_any := false
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy is Node2D:
+			var e: Node2D = enemy
+			if global_position.distance_to(e.global_position) <= SLAM_RADIUS:
+				e.queue_free()
+				hit_any = true
+	if hit_any:
+		Audio.play_sfx("explosion")
+	else:
+		Audio.play_sfx("tap")
