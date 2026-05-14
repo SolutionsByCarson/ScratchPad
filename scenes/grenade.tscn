@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/grenade.gd" id="1_grenade"]
+
+[sub_resource type="CircleShape2D" id="circle"]
+radius = 5.0
+
+[node name="Grenade" type="Area2D"]
+script = ExtResource("1_grenade")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.85, 0.3, 0.2, 1)
+polygon = PackedVector2Array(5, 0, 4.619, 1.913, 3.536, 3.536, 1.913, 4.619, 0, 5, -1.913, 4.619, -3.536, 3.536, -4.619, 1.913, -5, 0, -4.619, -1.913, -3.536, -3.536, -1.913, -4.619, 0, -5, 1.913, -4.619, 3.536, -3.536, 4.619, -1.913)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("circle")

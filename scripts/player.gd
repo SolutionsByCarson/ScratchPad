@@ -29,7 +29,9 @@ const AFTERIMAGE_DURATION := 0.22
 const AFTERIMAGE_START_ALPHA := 0.55
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
-const SHOOT_OFFSET := Vector2(12.0, 2.0)
+const SHOOT_OFFSET := Vector2(12.0, -4.0)
+const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
+const THROW_OFFSET := Vector2(10.0, -6.0)
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -88,6 +90,9 @@ func _physics_process(delta: float) -> void:
 
 	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("shoot"):
 		_shoot()
+
+	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("throw"):
+		_throw_grenade()
 
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
 
@@ -322,6 +327,14 @@ func _shoot() -> void:
 	fruit.position = global_position + Vector2(_facing * SHOOT_OFFSET.x, SHOOT_OFFSET.y)
 	fruit.direction = _facing
 	get_parent().add_child(fruit)
+	Audio.play_sfx("tap")
+
+
+func _throw_grenade() -> void:
+	var grenade := GRENADE_SCENE.instantiate()
+	grenade.position = global_position + Vector2(_facing * THROW_OFFSET.x, THROW_OFFSET.y)
+	grenade.direction = _facing
+	get_parent().add_child(grenade)
 	Audio.play_sfx("tap")
 
 
