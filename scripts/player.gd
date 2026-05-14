@@ -23,6 +23,10 @@ const SLAM_LAND_DURATION := 0.18
 const DASH_SCALE := Vector2(1.45, 0.7)
 const SLAM_DESCENT_SCALE := Vector2(0.65, 1.45)
 const SLAM_LAND_SCALE := Vector2(1.55, 0.55)
+const DASH_OFFSET_X := 4.0
+const AFTERIMAGE_INTERVAL := 0.05
+const AFTERIMAGE_DURATION := 0.22
+const AFTERIMAGE_START_ALPHA := 0.55
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, 2.0)
@@ -38,6 +42,7 @@ var _wall_stick_left := WALL_STICK_TIME
 var _wall_jump_lock_left := 0.0
 var _slamming := false
 var _slam_land_timer := 0.0
+var _afterimage_timer := 0.0
 var _ignore_wall_normal_x := 0.0
 var _wall_grace_left := 0.0
 var _last_wall_normal_x := 0.0
@@ -92,10 +97,15 @@ func _physics_process(delta: float) -> void:
 			sprite.flip_h = input_dir < 0.0
 		_dash_time_left = DASH_DURATION
 		_dash_cooldown_left = DASH_COOLDOWN
+		_afterimage_timer = 0.0
 		Audio.play_sfx("power_up")
 
 	if _dash_time_left > 0.0:
 		_dash_time_left -= delta
+		_afterimage_timer -= delta
+		if _afterimage_timer <= 0.0:
+			_spawn_afterimage()
+			_afterimage_timer = AFTERIMAGE_INTERVAL
 		velocity.x = _facing * DASH_SPEED
 		velocity.y = 0.0
 		move_and_slide()
@@ -178,12 +188,16 @@ func _update_visual_scale(delta: float) -> void:
 	_slam_land_timer = max(0.0, _slam_land_timer - delta)
 	if _slam_land_timer > 0.0:
 		sprite.scale = SLAM_LAND_SCALE
+		sprite.position.x = 0.0
 	elif _slamming:
 		sprite.scale = SLAM_DESCENT_SCALE
+		sprite.position.x = 0.0
 	elif _dash_time_left > 0.0:
 		sprite.scale = DASH_SCALE
+		sprite.position.x = _facing * DASH_OFFSET_X
 	else:
 		sprite.scale = Vector2.ONE
+		sprite.position.x = 0.0
 
 
 func _classify_wall_contact() -> Dictionary:
@@ -245,6 +259,23 @@ func _shape_info(node: Node) -> Dictionary:
 				info.size_y = rect.size.y
 			break
 	return info
+
+
+func _spawn_afterimage() -> void:
+	var ai := Sprite2D.new()
+	ai.texture = sprite.texture
+	ai.region_enabled = sprite.region_enabled
+	ai.region_rect = sprite.region_rect
+	ai.flip_h = sprite.flip_h
+	ai.offset = sprite.offset
+	ai.scale = sprite.scale
+	ai.z_index = -1
+	ai.modulate = Color(1.0, 1.0, 1.0, AFTERIMAGE_START_ALPHA)
+	get_parent().add_child(ai)
+	ai.global_position = sprite.global_position
+	var tween := ai.create_tween()
+	tween.tween_property(ai, "modulate:a", 0.0, AFTERIMAGE_DURATION)
+	tween.tween_callback(ai.queue_free)
 
 
 func _shoot() -> void:
