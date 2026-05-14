@@ -29,7 +29,7 @@ const AFTERIMAGE_DURATION := 0.22
 const AFTERIMAGE_START_ALPHA := 0.55
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
-const SHOOT_OFFSET := Vector2(12.0, 1.0)
+const SHOOT_OFFSET := Vector2(12.0, -3.0)
 const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
 const THROW_OFFSET := Vector2(10.0, -6.0)
 
@@ -86,6 +86,8 @@ func _physics_process(delta: float) -> void:
 	elif not on_vertical_wall:
 		_wall_attached = false
 	elif _wall_attached and signf(contact_normal_x) != signf(_wall_attached_normal_x):
+		_wall_attached = false
+	elif _wall_attached and input_dir != 0.0 and signf(input_dir) == signf(_wall_attached_normal_x):
 		_wall_attached = false
 
 	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("shoot"):
