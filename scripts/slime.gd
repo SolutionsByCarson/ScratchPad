@@ -66,6 +66,13 @@ func _process(delta: float) -> void:
 
 	var aggroed: bool = _aggro_left > 0.0
 
+	if not is_floating and (_state == State.WANDER or _state == State.CHASE):
+		var ground_below: float = _ground_y_below(position.x, position.y - 8.0)
+		if ground_below == INF or position.y + GROUND_OFFSET < ground_below - 2.0:
+			_state = State.JUMP
+			_velocity_y = 0.0
+			_jump_dir = 0.0
+
 	match _state:
 		State.WANDER:
 			_do_wander(delta)
