@@ -1,7 +1,7 @@
 extends Area2D
 
 const THROW_SPEED_X := 200.0
-const THROW_SPEED_Y := -260.0
+const THROW_SPEED_Y := -180.0
 const GRAVITY := 700.0
 const EXPLOSION_RADIUS := 48.0
 const TRAIL_INTERVAL := 0.04

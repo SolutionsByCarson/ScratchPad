@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://dygkjirhqc1mn"]
+[gd_scene load_steps=7 format=3 uid="uid://dygkjirhqc1mn"]
 
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://m3ki2sfs7u1g" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://d4akoe10fun56" path="res://scenes/level/floor.tscn" id="2_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://cdhxklvylx1m2" path="res://scenes/level/platform.tscn" id="3_tbgi4"]
-[ext_resource type="Script" uid="uid://my0tegjuhyd8" path="res://scripts/level_block.gd" id="4_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://cnf1ajmosnps4" path="res://scenes/level/wall.tscn" id="4_tefeu"]
+[ext_resource type="PackedScene" path="res://scenes/slime.tscn" id="5_tefeu"]
+[ext_resource type="PackedScene" path="res://scenes/slime_purple.tscn" id="6_o6xl0"]
 
 [node name="Main" type="Node2D"]
 
@@ -36,112 +37,165 @@ position = Vector2(1115, 172)
 
 [node name="Platform" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(154, 116)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform2" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(218, 116)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform16" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(183, 54)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform18" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(183, 54)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform17" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(247, 54)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform3" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(282, 116)
-script = ExtResource("4_tbgi4")
 
 [node name="Wall" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(478, 136)
-script = ExtResource("4_tbgi4")
 
 [node name="Wall2" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(478, -54)
-script = ExtResource("4_tbgi4")
 
 [node name="Wall5" parent="." instance=ExtResource("4_tefeu")]
-position = Vector2(412, -56)
-script = ExtResource("4_tbgi4")
+position = Vector2(408, -56)
 
 [node name="Wall8" parent="." instance=ExtResource("4_tefeu")]
-position = Vector2(412, -119)
-script = ExtResource("4_tbgi4")
+position = Vector2(408, -119)
 
 [node name="Wall9" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(801, -52)
-script = ExtResource("4_tbgi4")
+
+[node name="Wall11" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(801, 19)
 
 [node name="Wall10" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(801, -115)
-script = ExtResource("4_tbgi4")
 
 [node name="Wall6" parent="." instance=ExtResource("4_tefeu")]
-position = Vector2(412, 8)
-script = ExtResource("4_tbgi4")
+position = Vector2(408, 8)
 
 [node name="Wall7" parent="." instance=ExtResource("4_tefeu")]
-position = Vector2(412, 72)
-script = ExtResource("4_tbgi4")
+position = Vector2(408, 72)
+
+[node name="Wall20" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(4, 137)
+
+[node name="Wall21" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1271, 137)
 
 [node name="Wall3" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(478, 9)
-script = ExtResource("4_tbgi4")
 
 [node name="Wall4" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(478, 72)
-script = ExtResource("4_tbgi4")
+
+[node name="Wall12" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(941, 136)
+
+[node name="Wall13" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(941, -54)
+
+[node name="Wall14" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(871, -56)
+
+[node name="Wall15" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(941, -117)
+
+[node name="Wall16" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(871, 8)
+
+[node name="Wall17" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(871, 72)
+
+[node name="Wall18" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(941, 9)
+
+[node name="Wall19" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(941, 72)
 
 [node name="Platform4" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(514, -82)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform5" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(578, -82)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform6" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(640, -82)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform7" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(704, -82)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform12" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(513, 49)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform13" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(577, 49)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform14" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(639, 49)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform15" parent="." instance=ExtResource("3_tbgi4")]
-position = Vector2(703, 49)
-script = ExtResource("4_tbgi4")
+position = Vector2(773, 49)
 
 [node name="Platform8" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(583, -17)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform9" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(647, -17)
-script = ExtResource("4_tbgi4")
+
+[node name="Platform19" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(676, 114)
+
+[node name="Platform20" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(740, 114)
 
 [node name="Platform10" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(709, -17)
-script = ExtResource("4_tbgi4")
 
 [node name="Platform11" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(773, -17)
-script = ExtResource("4_tbgi4")
+
+[node name="Platform21" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(836, -84)
+
+[node name="Platform22" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(907, -145)
+
+[node name="Platform23" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform23" parent="Platform23" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform24" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1033, -145)
+
+[node name="Platform23" parent="Platform24" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Slime" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(768, -56)
+
+[node name="SlimePurple" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(692, 71)
+
+[node name="SlimePurple2" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(591, 139)
+
+[node name="Slime2" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(556, 22)
+
+[node name="SlimePurple3" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(227, 22)
+
+[node name="Slime3" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(200, 81)
+
+[node name="Slime4" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(272, 81)
+
+[node name="Slime5" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(967, -172)
