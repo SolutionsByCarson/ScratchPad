@@ -207,16 +207,49 @@ func _update_visual_scale(delta: float) -> void:
 
 func _classify_wall_contact() -> Dictionary:
 	var result := {"is_wall": false, "normal_x": 0.0}
-	if not is_on_wall_only():
+	if is_on_wall_only():
+		for i in range(get_slide_collision_count()):
+			var collision := get_slide_collision(i)
+			var n: Vector2 = collision.get_normal()
+			if absf(n.x) <= 0.7:
+				continue
+			var collider: Object = collision.get_collider()
+			if collider == null:
+				continue
+			var collider_node: Node = collider as Node
+			if collider_node == null:
+				continue
+			var info: Dictionary = _shape_info(collider_node)
+			var size_x: float = info.size_x
+			var size_y: float = info.size_y
+			if size_y <= size_x:
+				continue
+			if _ignore_wall_normal_x != 0.0 and signf(n.x) == signf(_ignore_wall_normal_x):
+				continue
+			result.is_wall = true
+			result.normal_x = n.x
+			return result
+
+	# Fallback: short horizontal rays to detect walls flush against the
+	# player even when no motion-into-wall is active (player not pressing
+	# direction). is_on_wall_only() only fires when move_and_slide last
+	# pushed into a wall, so without this the player would lose wall jump
+	# the moment they release direction.
+	if is_on_floor():
 		return result
-	for i in range(get_slide_collision_count()):
-		var collision := get_slide_collision(i)
-		var n: Vector2 = collision.get_normal()
-		if absf(n.x) <= 0.7:
+	var space := get_world_2d().direct_space_state
+	for normal_x in [1.0, -1.0]:
+		if _ignore_wall_normal_x != 0.0 and signf(normal_x) == signf(_ignore_wall_normal_x):
 			continue
-		var collider: Object = collision.get_collider()
-		if collider == null:
+		var origin: Vector2 = global_position
+		var target: Vector2 = origin + Vector2(-normal_x * 9.0, 0.0)
+		var query := PhysicsRayQueryParameters2D.create(origin, target)
+		query.exclude = [self]
+		query.collide_with_areas = false
+		var hit: Dictionary = space.intersect_ray(query)
+		if hit.is_empty():
 			continue
+		var collider: Object = hit.collider
 		var collider_node: Node = collider as Node
 		if collider_node == null:
 			continue
@@ -225,10 +258,8 @@ func _classify_wall_contact() -> Dictionary:
 		var size_y: float = info.size_y
 		if size_y <= size_x:
 			continue
-		if _ignore_wall_normal_x != 0.0 and signf(n.x) == signf(_ignore_wall_normal_x):
-			continue
 		result.is_wall = true
-		result.normal_x = n.x
+		result.normal_x = normal_x
 		return result
 	return result
 
