@@ -29,7 +29,7 @@ const AFTERIMAGE_DURATION := 0.22
 const AFTERIMAGE_START_ALPHA := 0.55
 
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
-const SHOOT_OFFSET := Vector2(12.0, -4.0)
+const SHOOT_OFFSET := Vector2(12.0, 1.0)
 const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
 const THROW_OFFSET := Vector2(10.0, -6.0)
 
