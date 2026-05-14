@@ -118,6 +118,7 @@ func _physics_process(delta: float) -> void:
 		_slamming = true
 		velocity.x = 0.0
 		velocity.y = SLAM_SPEED
+		_afterimage_timer = 0.0
 
 	if _slamming:
 		if is_on_floor():
@@ -128,6 +129,10 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity += get_gravity() * delta
 			velocity.x = 0.0
+			_afterimage_timer -= delta
+			if _afterimage_timer <= 0.0:
+				_spawn_afterimage()
+				_afterimage_timer = AFTERIMAGE_INTERVAL
 			move_and_slide()
 			return
 
