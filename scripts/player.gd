@@ -6,7 +6,7 @@ const COYOTE_TIME := 0.10
 const JUMP_BUFFER := 0.10
 
 const DASH_SPEED := 320.0
-const DASH_DURATION := 0.15
+const DASH_DURATION := 0.17
 const DASH_COOLDOWN := 0.5
 
 const WALL_STICK_TIME := 0.20

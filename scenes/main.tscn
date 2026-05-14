@@ -17,17 +17,17 @@ size = Vector2(16, 64)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_TallWall"]
 size = Vector2(16, 190.375)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(47, 9)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_TallWall2"]
 size = Vector2(16, 190.375)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_TowerLeftWall"]
-size = Vector2(16, 96)
+size = Vector2(16, 80)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_TowerRightWall"]
-size = Vector2(16, 96)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
-size = Vector2(48.25, 9)
+size = Vector2(16, 79.5)
 
 [node name="Main" type="Node2D"]
 
@@ -372,7 +372,7 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(240, 80)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
-position = Vector2(-8, -3)
+position = Vector2(-8.5, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -385,7 +385,7 @@ region_rect = Rect2(0, 32, 64, 16)
 position = Vector2(640, 100)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform4"]
-position = Vector2(-8.5, -3)
+position = Vector2(-8, -3)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -397,8 +397,13 @@ region_rect = Rect2(0, 32, 64, 16)
 [node name="Platform5" type="StaticBody2D" parent="."]
 position = Vector2(527, -22)
 
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Platform5"]
+position = Vector2(39, -3)
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platform5"]
-position = Vector2(16, -3.5)
+position = Vector2(-8, -3.5)
 shape = SubResource("RectangleShape2D_platform")
 one_way_collision = true
 
@@ -450,6 +455,7 @@ position = Vector2(170, 148)
 
 [node name="Slime3" parent="." instance=ExtResource("3_slime")]
 position = Vector2(370, 148)
+scale = Vector2(0.979793, 1.14959)
 
 [node name="Slime4" parent="." instance=ExtResource("4_slime_purple")]
 position = Vector2(635, 148)
@@ -458,11 +464,13 @@ position = Vector2(635, 148)
 position = Vector2(820, 148)
 
 [node name="Slime7" parent="." instance=ExtResource("4_slime_purple")]
-position = Vector2(240, 60)
+position = Vector2(238, 27)
+scale = Vector2(0.916851, 1.0039)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="Controls" type="Label" parent="HUD"]
+visible = false
 offset_left = 4.0
 offset_top = 2.0
 offset_right = 320.0
@@ -681,7 +689,8 @@ region_rect = Rect2(0, 16, 64, 16)
 position = Vector2(1280, 112)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TowerLeftWall"]
-position = Vector2(0, 16)
+position = Vector2(0, 24)
+scale = Vector2(0.971743, 1.0155)
 shape = SubResource("RectangleShape2D_TowerLeftWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="TowerLeftWall"]
@@ -694,7 +703,8 @@ region_rect = Rect2(24, 0, 16, 64)
 position = Vector2(1370, 112)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TowerRightWall"]
-position = Vector2(0, 15.5)
+position = Vector2(0, 23.75)
+scale = Vector2(1, 1.00547)
 shape = SubResource("RectangleShape2D_TowerRightWall")
 
 [node name="Sprite2D" type="Sprite2D" parent="TowerRightWall"]
@@ -711,10 +721,6 @@ position = Vector2(1310, 39)
 
 [node name="Slime10" parent="." instance=ExtResource("3_slime")]
 position = Vector2(1500, 148)
-
-[node name="Slime11" parent="." instance=ExtResource("4_slime_purple")]
-position = Vector2(1620, 90)
-is_floating = true
 
 [node name="Slime12" parent="." instance=ExtResource("3_slime")]
 position = Vector2(1850, 148)
@@ -734,3 +740,7 @@ position = Vector2(2600, 148)
 
 [node name="Slime17" parent="." instance=ExtResource("4_slime_purple")]
 position = Vector2(2819, 39)
+
+[node name="Slime11" parent="." instance=ExtResource("4_slime_purple")]
+position = Vector2(205, 28)
+scale = Vector2(0.916851, 1.0039)
