@@ -231,6 +231,9 @@ func _update_sprite_scale() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
-	if body.is_in_group("player") and _hurt_cooldown_left <= 0.0:
-		_hurt_cooldown_left = HURT_COOLDOWN
-		Audio.play_sfx("hurt")
+	if not body.is_in_group("player") or _hurt_cooldown_left > 0.0:
+		return
+	if body.is_in_group("dashing"):
+		return
+	_hurt_cooldown_left = HURT_COOLDOWN
+	Audio.play_sfx("hurt")

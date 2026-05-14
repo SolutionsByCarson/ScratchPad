@@ -98,6 +98,7 @@ func _physics_process(delta: float) -> void:
 		_dash_time_left = DASH_DURATION
 		_dash_cooldown_left = DASH_COOLDOWN
 		_afterimage_timer = 0.0
+		add_to_group("dashing")
 		Audio.play_sfx("power_up")
 
 	if _dash_time_left > 0.0:
@@ -109,6 +110,8 @@ func _physics_process(delta: float) -> void:
 		velocity.x = _facing * DASH_SPEED
 		velocity.y = 0.0
 		move_and_slide()
+		if _dash_time_left <= 0.0:
+			remove_from_group("dashing")
 		return
 
 	if is_on_floor() and Input.is_action_just_pressed("slam") and _is_on_one_way_platform():
