@@ -19,6 +19,6 @@ func _sync_visual() -> void:
 	if not (cs.shape is RectangleShape2D):
 		return
 	var rect: RectangleShape2D = cs.shape
-	var size: Vector2 = rect.size
-	visual.size = size
-	visual.position = cs.position - size / 2.0
+	var half: Vector2 = rect.size / 2.0
+	visual.size = rect.size
+	visual.position = cs.position - half
