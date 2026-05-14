@@ -38,6 +38,7 @@ var _initial_y := 0.0
 var _aggro_left := 0.0
 var _velocity_y := 0.0
 var _jump_dir := 0.0
+var _player_rid: RID = RID()
 
 
 func _ready() -> void:
@@ -60,6 +61,8 @@ func _process(delta: float) -> void:
 		dy = player.global_position.y - global_position.y
 		if absf(dx) <= aggro_x_range and absf(dy) <= aggro_y_tolerance:
 			_aggro_left = aggro_duration
+		if not _player_rid.is_valid() and player is CollisionObject2D:
+			_player_rid = (player as CollisionObject2D).get_rid()
 
 	var aggroed: bool = _aggro_left > 0.0
 
@@ -161,6 +164,8 @@ func _has_ground_at(x: float) -> bool:
 	var target: Vector2 = origin + Vector2(0.0, 32.0)
 	var query := PhysicsRayQueryParameters2D.create(origin, target)
 	query.collide_with_areas = false
+	if _player_rid.is_valid():
+		query.exclude = [_player_rid]
 	var hit: Dictionary = space.intersect_ray(query)
 	return not hit.is_empty()
 
@@ -170,6 +175,8 @@ func _is_blocked_at(x: float, y: float) -> bool:
 	var query := PhysicsPointQueryParameters2D.new()
 	query.position = Vector2(x, y)
 	query.collide_with_areas = false
+	if _player_rid.is_valid():
+		query.exclude = [_player_rid]
 	var results: Array = space.intersect_point(query)
 	return results.size() > 0
 
@@ -180,6 +187,8 @@ func _ground_y_below(x: float, from_y: float) -> float:
 	var target: Vector2 = origin + Vector2(0.0, 800.0)
 	var query := PhysicsRayQueryParameters2D.create(origin, target)
 	query.collide_with_areas = false
+	if _player_rid.is_valid():
+		query.exclude = [_player_rid]
 	var hit: Dictionary = space.intersect_ray(query)
 	if hit.is_empty():
 		return INF
