@@ -96,7 +96,12 @@ func _process(delta: float) -> void:
 				_state = State.JUMP
 				_velocity_y = JUMP_VELOCITY_Y
 		State.JUMP:
-			position.x += _jump_dir * JUMP_VELOCITY_X * delta
+			if _jump_dir != 0.0:
+				var next_x: float = position.x + _jump_dir * JUMP_VELOCITY_X * delta
+				if _is_blocked_at(next_x + _jump_dir * 4.0, position.y):
+					_jump_dir = 0.0
+				else:
+					position.x = next_x
 			_velocity_y += GRAVITY * delta
 			position.y += _velocity_y * delta
 			if _velocity_y > 0.0:
