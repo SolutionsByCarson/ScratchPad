@@ -42,10 +42,10 @@ func _on_area_entered(area: Area2D) -> void:
 
 
 func _spawn_trail() -> void:
-	var src: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
+	var src: Polygon2D = get_node_or_null("Visual") as Polygon2D
 	if src == null:
 		return
-	var ghost: Sprite2D = src.duplicate()
+	var ghost: Polygon2D = src.duplicate()
 	ghost.z_index = -1
 	ghost.modulate = Color(1.0, 1.0, 1.0, 0.5)
 	get_parent().add_child(ghost)
