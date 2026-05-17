@@ -5,7 +5,7 @@
 [sub_resource type="CircleShape2D" id="circle"]
 radius = 5.0
 
-[node name="Grenade" type="Area2D"]
+[node name="Grenade" type="CharacterBody2D"]
 script = ExtResource("1_grenade")
 
 [node name="Visual" type="Polygon2D" parent="."]

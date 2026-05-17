@@ -31,7 +31,7 @@ const AFTERIMAGE_START_ALPHA := 0.55
 const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, -3.0)
 const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
-const THROW_OFFSET := Vector2(10.0, -6.0)
+const THROW_OFFSET := Vector2(16.0, -6.0)
 
 const MAX_HEALTH := 3
 const INVULN_TIME := 1.0
@@ -82,14 +82,21 @@ func _update_hp_ui() -> void:
 
 
 func take_damage(amount: int = 1) -> void:
-	if _invuln_left > 0.0 or is_in_group("dashing"):
+	if _invuln_left > 0.0 or is_in_group("dashing") or _slamming:
 		return
 	_health -= amount
 	_invuln_left = INVULN_TIME
 	Audio.play_sfx("hurt")
+	_flash_red()
 	_update_hp_ui()
 	if _health <= 0:
 		_die()
+
+
+func _flash_red() -> void:
+	sprite.modulate = Color(1.0, 0.3, 0.3, 1.0)
+	var tween := create_tween()
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.4)
 
 
 func _die() -> void:

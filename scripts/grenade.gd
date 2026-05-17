@@ -1,43 +1,54 @@
-extends Area2D
+extends CharacterBody2D
 
 const THROW_SPEED_X := 200.0
 const THROW_SPEED_Y := -180.0
 const GRAVITY := 700.0
 const EXPLOSION_RADIUS := 48.0
+const CONTACT_RADIUS := 9.0
+const PLAYER_DAMAGE := 2
+const BOUNCE_DAMP := 0.55
+const LIFETIME := 5.0
+const ARM_TIME := 0.15
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.28
-const LIFETIME := 4.0
 
 var direction: float = 1.0
-var _velocity: Vector2 = Vector2.ZERO
 var _trail_timer := 0.0
 var _life_left := LIFETIME
+var _arm_left := ARM_TIME
 var _exploded := false
 
 
 func _ready() -> void:
-	_velocity = Vector2(direction * THROW_SPEED_X, THROW_SPEED_Y)
-	body_entered.connect(_on_body_entered)
+	velocity = Vector2(direction * THROW_SPEED_X, THROW_SPEED_Y)
 
 
 func _physics_process(delta: float) -> void:
 	if _exploded:
 		return
-	_velocity.y += GRAVITY * delta
-	position += _velocity * delta
+	_arm_left = max(0.0, _arm_left - delta)
+	velocity.y += GRAVITY * delta
+	var collision := move_and_collide(velocity * delta)
+	if collision != null:
+		var collider: Object = collision.get_collider()
+		if _arm_left <= 0.0 and collider != null and (collider as Node).is_in_group("player"):
+			_explode()
+			return
+		velocity = velocity.bounce(collision.get_normal()) * BOUNCE_DAMP
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy is Node2D and global_position.distance_to((enemy as Node2D).global_position) <= CONTACT_RADIUS:
+			_explode()
+			return
+
 	_trail_timer -= delta
 	if _trail_timer <= 0.0:
 		_spawn_trail()
 		_trail_timer = TRAIL_INTERVAL
+
 	_life_left -= delta
 	if _life_left <= 0.0:
 		_explode()
-
-
-func _on_body_entered(body: Node) -> void:
-	if body.is_in_group("player"):
-		return
-	_explode()
 
 
 func _explode() -> void:
@@ -53,6 +64,10 @@ func _explode() -> void:
 					e.take_damage(1)
 				else:
 					e.queue_free()
+	var player := get_tree().get_first_node_in_group("player")
+	if player is Node2D and player.has_method("take_damage"):
+		if global_position.distance_to((player as Node2D).global_position) <= EXPLOSION_RADIUS:
+			player.take_damage(PLAYER_DAMAGE)
 	queue_free()
 
 
