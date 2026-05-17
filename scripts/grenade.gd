@@ -27,7 +27,12 @@ var _exploded := false
 
 
 func _ready() -> void:
+	add_to_group("grenade")
 	velocity = Vector2(direction * THROW_SPEED_X, THROW_SPEED_Y)
+
+
+func detonate() -> void:
+	_explode()
 
 
 func _physics_process(delta: float) -> void:

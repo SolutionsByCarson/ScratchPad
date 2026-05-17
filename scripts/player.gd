@@ -385,6 +385,10 @@ func _shoot() -> void:
 
 
 func _throw_grenade() -> void:
+	var existing := get_tree().get_first_node_in_group("grenade")
+	if existing != null and existing.has_method("detonate"):
+		existing.detonate()
+		return
 	var grenade := GRENADE_SCENE.instantiate()
 	grenade.position = global_position + Vector2(_facing * THROW_OFFSET.x, THROW_OFFSET.y)
 	grenade.direction = _facing
