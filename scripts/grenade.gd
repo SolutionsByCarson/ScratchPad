@@ -14,7 +14,7 @@ const ARM_TIME := 0.15
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.28
 
-const CLOUD_BALL_COUNT := 16
+const CLOUD_BALL_COUNT := 48
 const CLOUD_BALL_RADIUS := 3.0
 const CLOUD_DURATION := 0.45
 const CLOUD_COLOR := Color(1.0, 0.6, 0.15, 1.0)
