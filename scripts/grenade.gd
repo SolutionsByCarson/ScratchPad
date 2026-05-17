@@ -6,6 +6,7 @@ const GRAVITY := 700.0
 const EXPLOSION_RADIUS := 48.0
 const CONTACT_RADIUS := 9.0
 const PLAYER_DAMAGE := 2
+const ENEMY_DAMAGE := 2
 const BOUNCE_DAMP := 0.55
 const LIFETIME := 5.0
 const ARM_TIME := 0.15
@@ -61,7 +62,7 @@ func _explode() -> void:
 			var e: Node2D = enemy
 			if global_position.distance_to(e.global_position) <= EXPLOSION_RADIUS:
 				if e.has_method("take_damage"):
-					e.take_damage(1)
+					e.take_damage(ENEMY_DAMAGE)
 				else:
 					e.queue_free()
 	var player := get_tree().get_first_node_in_group("player")
