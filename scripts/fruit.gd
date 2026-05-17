@@ -37,7 +37,10 @@ func _on_body_entered(body: Node) -> void:
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemy"):
 		Audio.play_sfx("explosion")
-		area.queue_free()
+		if area.has_method("take_damage"):
+			area.take_damage(1)
+		else:
+			area.queue_free()
 		queue_free()
 
 

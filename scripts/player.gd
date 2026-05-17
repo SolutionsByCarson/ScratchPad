@@ -33,6 +33,10 @@ const SHOOT_OFFSET := Vector2(12.0, -3.0)
 const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
 const THROW_OFFSET := Vector2(10.0, -6.0)
 
+const MAX_HEALTH := 3
+const INVULN_TIME := 1.0
+const FALL_DEATH_Y := 350.0
+
 @onready var sprite: Sprite2D = $Sprite2D
 
 var _coyote_timer := 0.0
@@ -50,14 +54,55 @@ var _wall_grace_left := 0.0
 var _last_wall_normal_x := 0.0
 var _wall_attached := false
 var _wall_attached_normal_x := 0.0
+var _health := MAX_HEALTH
+var _invuln_left := 0.0
+var _hp_label: Label
 
 
 func _ready() -> void:
 	add_to_group("player")
+	_setup_hp_ui()
+	_update_hp_ui()
+
+
+func _setup_hp_ui() -> void:
+	var layer := CanvasLayer.new()
+	add_child(layer)
+	_hp_label = Label.new()
+	_hp_label.offset_left = 4.0
+	_hp_label.offset_top = 2.0
+	_hp_label.offset_right = 120.0
+	_hp_label.offset_bottom = 20.0
+	layer.add_child(_hp_label)
+
+
+func _update_hp_ui() -> void:
+	if _hp_label != null:
+		_hp_label.text = "HP %d/%d" % [maxi(_health, 0), MAX_HEALTH]
+
+
+func take_damage(amount: int = 1) -> void:
+	if _invuln_left > 0.0 or is_in_group("dashing"):
+		return
+	_health -= amount
+	_invuln_left = INVULN_TIME
+	Audio.play_sfx("hurt")
+	_update_hp_ui()
+	if _health <= 0:
+		_die()
+
+
+func _die() -> void:
+	get_tree().reload_current_scene()
 
 
 func _physics_process(delta: float) -> void:
 	_update_visual_scale(delta)
+
+	_invuln_left = max(0.0, _invuln_left - delta)
+	if global_position.y > FALL_DEATH_Y:
+		_die()
+		return
 
 	_wall_jump_lock_left = max(0.0, _wall_jump_lock_left - delta)
 	if _wall_jump_lock_left <= 0.0:
@@ -345,4 +390,7 @@ func _do_slam_damage() -> void:
 		if enemy is Node2D:
 			var e: Node2D = enemy
 			if global_position.distance_to(e.global_position) <= SLAM_RADIUS:
-				e.queue_free()
+				if e.has_method("take_damage"):
+					e.take_damage(1)
+				else:
+					e.queue_free()

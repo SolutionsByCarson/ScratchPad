@@ -49,7 +49,10 @@ func _explode() -> void:
 		if enemy is Node2D:
 			var e: Node2D = enemy
 			if global_position.distance_to(e.global_position) <= EXPLOSION_RADIUS:
-				e.queue_free()
+				if e.has_method("take_damage"):
+					e.take_damage(1)
+				else:
+					e.queue_free()
 	queue_free()
 
 

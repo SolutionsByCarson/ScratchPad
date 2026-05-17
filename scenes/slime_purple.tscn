@@ -8,6 +8,7 @@ size = Vector2(16, 14)
 
 [node name="SlimePurple" type="Area2D"]
 script = ExtResource("1_slime")
+max_health = 2
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, 12)

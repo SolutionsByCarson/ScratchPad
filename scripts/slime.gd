@@ -5,6 +5,7 @@ extends Area2D
 @export var aggro_y_tolerance: float = 24.0
 @export var aggro_duration: float = 30.0
 @export var wander_radius: float = 48.0
+@export var max_health: int = 1
 
 const HURT_COOLDOWN := 0.6
 const WANDER_SPEED := 24.0
@@ -39,6 +40,7 @@ var _aggro_left := 0.0
 var _velocity_y := 0.0
 var _jump_dir := 0.0
 var _player_rid: RID = RID()
+var _health: int = 1
 
 
 func _ready() -> void:
@@ -46,7 +48,14 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	_initial_x = position.x
 	_initial_y = position.y
+	_health = max_health
 	_pick_new_wander_direction()
+
+
+func take_damage(amount: int = 1) -> void:
+	_health -= amount
+	if _health <= 0:
+		queue_free()
 
 
 func _process(delta: float) -> void:
@@ -236,4 +245,5 @@ func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("dashing"):
 		return
 	_hurt_cooldown_left = HURT_COOLDOWN
-	Audio.play_sfx("hurt")
+	if body.has_method("take_damage"):
+		body.take_damage(1)
