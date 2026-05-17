@@ -5,6 +5,7 @@ const THROW_SPEED_Y := -180.0
 const GRAVITY := 700.0
 const EXPLOSION_RADIUS := 48.0
 const CONTACT_RADIUS := 9.0
+const PLAYER_CONTACT_RADIUS := 12.0
 const PLAYER_DAMAGE := 2
 const ENEMY_DAMAGE := 2
 const BOUNCE_DAMP := 0.55
@@ -39,6 +40,12 @@ func _physics_process(delta: float) -> void:
 
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D and global_position.distance_to((enemy as Node2D).global_position) <= CONTACT_RADIUS:
+			_explode()
+			return
+
+	if _arm_left <= 0.0:
+		var p := get_tree().get_first_node_in_group("player")
+		if p is Node2D and global_position.distance_to((p as Node2D).global_position) <= PLAYER_CONTACT_RADIUS:
 			_explode()
 			return
 
