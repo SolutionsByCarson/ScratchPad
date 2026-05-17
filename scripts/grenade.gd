@@ -14,6 +14,11 @@ const ARM_TIME := 0.15
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.28
 
+const CLOUD_BALL_COUNT := 16
+const CLOUD_BALL_RADIUS := 3.0
+const CLOUD_DURATION := 0.45
+const CLOUD_COLOR := Color(1.0, 0.6, 0.15, 1.0)
+
 var direction: float = 1.0
 var _trail_timer := 0.0
 var _life_left := LIFETIME
@@ -49,6 +54,11 @@ func _physics_process(delta: float) -> void:
 			_explode()
 			return
 
+	for f in get_tree().get_nodes_in_group("fruit"):
+		if f is Node2D and global_position.distance_to((f as Node2D).global_position) <= CONTACT_RADIUS + 3.0:
+			_explode()
+			return
+
 	_trail_timer -= delta
 	if _trail_timer <= 0.0:
 		_spawn_trail()
@@ -64,6 +74,7 @@ func _explode() -> void:
 		return
 	_exploded = true
 	Audio.play_sfx("explosion")
+	_spawn_explosion_cloud()
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D:
 			var e: Node2D = enemy
@@ -77,6 +88,36 @@ func _explode() -> void:
 		if global_position.distance_to((player as Node2D).global_position) <= EXPLOSION_RADIUS:
 			player.take_damage(PLAYER_DAMAGE)
 	queue_free()
+
+
+func _circle_polygon(r: float) -> PackedVector2Array:
+	var pts: PackedVector2Array = []
+	for i in range(10):
+		var a: float = TAU * float(i) / 10.0
+		pts.append(Vector2(cos(a), sin(a)) * r)
+	return pts
+
+
+func _spawn_explosion_cloud() -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var poly_pts: PackedVector2Array = _circle_polygon(CLOUD_BALL_RADIUS)
+	var center: Vector2 = global_position
+	for i in range(CLOUD_BALL_COUNT):
+		var ball := Polygon2D.new()
+		ball.polygon = poly_pts
+		ball.color = CLOUD_COLOR
+		ball.z_index = 5
+		ball.scale = Vector2(0.3, 0.3)
+		parent.add_child(ball)
+		var ang: float = randf() * TAU
+		var dist: float = sqrt(randf()) * EXPLOSION_RADIUS
+		ball.global_position = center + Vector2(cos(ang), sin(ang)) * dist
+		var tween := ball.create_tween().set_parallel(true)
+		tween.tween_property(ball, "scale", Vector2(1.3, 1.3), CLOUD_DURATION)
+		tween.tween_property(ball, "modulate:a", 0.0, CLOUD_DURATION)
+		tween.chain().tween_callback(ball.queue_free)
 
 
 func _spawn_trail() -> void:
