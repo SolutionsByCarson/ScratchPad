@@ -14,10 +14,9 @@ const ARM_TIME := 0.15
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.28
 
-const CLOUD_BALL_COUNT := 48
-const CLOUD_BALL_RADIUS := 3.0
-const CLOUD_DURATION := 0.45
-const CLOUD_COLOR := Color(1.0, 0.6, 0.15, 1.0)
+const BLAST_DURATION := 0.4
+const BLAST_COLOR := Color(1.0, 0.15, 0.15, 0.55)
+const BLAST_SEGMENTS := 32
 
 var direction: float = 1.0
 var _trail_timer := 0.0
@@ -79,7 +78,7 @@ func _explode() -> void:
 		return
 	_exploded = true
 	Audio.play_sfx("explosion")
-	_spawn_explosion_cloud()
+	_spawn_explosion_ring()
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D:
 			var e: Node2D = enemy
@@ -95,34 +94,25 @@ func _explode() -> void:
 	queue_free()
 
 
-func _circle_polygon(r: float) -> PackedVector2Array:
-	var pts: PackedVector2Array = []
-	for i in range(10):
-		var a: float = TAU * float(i) / 10.0
-		pts.append(Vector2(cos(a), sin(a)) * r)
-	return pts
-
-
-func _spawn_explosion_cloud() -> void:
+func _spawn_explosion_ring() -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
-	var poly_pts: PackedVector2Array = _circle_polygon(CLOUD_BALL_RADIUS)
-	var center: Vector2 = global_position
-	for i in range(CLOUD_BALL_COUNT):
-		var ball := Polygon2D.new()
-		ball.polygon = poly_pts
-		ball.color = CLOUD_COLOR
-		ball.z_index = 5
-		ball.scale = Vector2(0.3, 0.3)
-		parent.add_child(ball)
-		var ang: float = randf() * TAU
-		var dist: float = sqrt(randf()) * EXPLOSION_RADIUS
-		ball.global_position = center + Vector2(cos(ang), sin(ang)) * dist
-		var tween := ball.create_tween().set_parallel(true)
-		tween.tween_property(ball, "scale", Vector2(1.3, 1.3), CLOUD_DURATION)
-		tween.tween_property(ball, "modulate:a", 0.0, CLOUD_DURATION)
-		tween.chain().tween_callback(ball.queue_free)
+	var pts: PackedVector2Array = []
+	for i in range(BLAST_SEGMENTS):
+		var a: float = TAU * float(i) / float(BLAST_SEGMENTS)
+		pts.append(Vector2(cos(a), sin(a)) * EXPLOSION_RADIUS)
+	var ring := Polygon2D.new()
+	ring.polygon = pts
+	ring.color = BLAST_COLOR
+	ring.scale = Vector2(0.05, 0.05)
+	ring.z_index = 5
+	parent.add_child(ring)
+	ring.global_position = global_position
+	var tween := ring.create_tween().set_parallel(true)
+	tween.tween_property(ring, "scale", Vector2.ONE, BLAST_DURATION)
+	tween.tween_property(ring, "modulate:a", 0.0, BLAST_DURATION)
+	tween.chain().tween_callback(ring.queue_free)
 
 
 func _spawn_trail() -> void:
