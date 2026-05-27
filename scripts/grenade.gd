@@ -20,6 +20,8 @@ const TRAIL_DURATION := 0.28
 const BLAST_COLOR := Color(1.0, 0.15, 0.15, 0.8)
 const BLAST_SEGMENTS := 32
 const PRIME_DELAY := 0.09
+const TIMEOUT_BLINK_DURATION := 0.6
+const TIMEOUT_BLINK_COUNT := 3
 
 var direction: float = 1.0
 var explosion_radius: float = BASE_EXPLOSION_RADIUS
@@ -31,6 +33,8 @@ var _priming := false
 var _wave_radius := 0.0
 var _wave_duration := 0.0
 var _damaged: Array = []
+var _blink_started := false
+var _blink_tween: Tween
 
 
 func _ready() -> void:
@@ -56,12 +60,27 @@ func _prime_explode() -> void:
 		return
 	_priming = true
 	velocity = Vector2.ZERO
+	if _blink_tween != null and _blink_tween.is_valid():
+		_blink_tween.kill()
 	Audio.play_sfx("tap")
 	var visual: Polygon2D = get_node_or_null("Visual") as Polygon2D
 	if visual != null:
 		visual.color = Color(1.0, 1.0, 1.0, 1.0)
 		visual.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	get_tree().create_timer(PRIME_DELAY).timeout.connect(_explode)
+
+
+func _start_timeout_blink() -> void:
+	var visual: Polygon2D = get_node_or_null("Visual") as Polygon2D
+	if visual == null:
+		return
+	var base_color: Color = visual.color
+	var flash_color := Color(1.0, 1.0, 1.0, 1.0)
+	var half: float = TIMEOUT_BLINK_DURATION / float(TIMEOUT_BLINK_COUNT * 2)
+	_blink_tween = create_tween()
+	for i in range(TIMEOUT_BLINK_COUNT):
+		_blink_tween.tween_property(visual, "color", flash_color, half)
+		_blink_tween.tween_property(visual, "color", base_color, half)
 
 
 func _physics_process(delta: float) -> void:
@@ -102,6 +121,9 @@ func _physics_process(delta: float) -> void:
 		_trail_timer = TRAIL_INTERVAL
 
 	_life_left -= delta
+	if not _blink_started and _life_left <= TIMEOUT_BLINK_DURATION and _life_left > 0.0:
+		_blink_started = true
+		_start_timeout_blink()
 	if _life_left <= 0.0:
 		_prime_explode()
 
