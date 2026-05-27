@@ -14,8 +14,8 @@ const ARM_TIME := 0.15
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.28
 
-const BLAST_DURATION := 0.4
-const BLAST_COLOR := Color(1.0, 0.15, 0.15, 0.55)
+const BLAST_DURATION := 0.25
+const BLAST_COLOR := Color(1.0, 0.15, 0.15, 0.8)
 const BLAST_SEGMENTS := 32
 
 var direction: float = 1.0
@@ -109,10 +109,20 @@ func _spawn_explosion_ring() -> void:
 	ring.z_index = 5
 	parent.add_child(ring)
 	ring.global_position = global_position
-	var tween := ring.create_tween().set_parallel(true)
-	tween.tween_property(ring, "scale", Vector2.ONE, BLAST_DURATION)
-	tween.tween_property(ring, "modulate:a", 0.0, BLAST_DURATION)
-	tween.chain().tween_callback(ring.queue_free)
+
+	var scale_tw := ring.create_tween()
+	scale_tw.tween_property(ring, "scale", Vector2.ONE, BLAST_DURATION) \
+		.set_trans(Tween.TRANS_BACK) \
+		.set_ease(Tween.EASE_OUT)
+
+	var flash_time: float = BLAST_DURATION / 6.0
+	var flash_tw := ring.create_tween()
+	flash_tw.tween_property(ring, "modulate:a", 0.25, flash_time)
+	flash_tw.tween_property(ring, "modulate:a", 1.0, flash_time)
+	flash_tw.tween_property(ring, "modulate:a", 0.25, flash_time)
+	flash_tw.tween_property(ring, "modulate:a", 1.0, flash_time)
+	flash_tw.tween_property(ring, "modulate:a", 0.0, flash_time * 2.0)
+	flash_tw.tween_callback(ring.queue_free)
 
 
 func _spawn_trail() -> void:
