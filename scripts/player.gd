@@ -170,9 +170,7 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("throw") and not _throw_charging:
 		var existing := get_tree().get_first_node_in_group("grenade")
-		if existing != null and existing.has_method("detonate"):
-			existing.detonate()
-		elif _dash_time_left <= 0.0 and not _wall_attached:
+		if existing == null and _dash_time_left <= 0.0 and not _wall_attached:
 			_throw_charging = true
 			_throw_charge = 0.0
 			_last_charge_tick = 0
