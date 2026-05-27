@@ -19,6 +19,7 @@ const TRAIL_DURATION := 0.28
 
 const BLAST_COLOR := Color(1.0, 0.15, 0.15, 0.8)
 const BLAST_SEGMENTS := 32
+const PRIME_DELAY := 0.09
 
 var direction: float = 1.0
 var explosion_radius: float = BASE_EXPLOSION_RADIUS
@@ -26,6 +27,7 @@ var _trail_timer := 0.0
 var _life_left := LIFETIME
 var _arm_left := ARM_TIME
 var _exploded := false
+var _priming := false
 var _wave_radius := 0.0
 var _wave_duration := 0.0
 var _damaged: Array = []
@@ -46,12 +48,27 @@ func set_charge(seconds: float) -> void:
 
 
 func detonate() -> void:
-	_explode()
+	_prime_explode()
+
+
+func _prime_explode() -> void:
+	if _exploded or _priming:
+		return
+	_priming = true
+	velocity = Vector2.ZERO
+	Audio.play_sfx("tap")
+	var visual: Polygon2D = get_node_or_null("Visual") as Polygon2D
+	if visual != null:
+		visual.color = Color(1.0, 1.0, 1.0, 1.0)
+		visual.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	get_tree().create_timer(PRIME_DELAY).timeout.connect(_explode)
 
 
 func _physics_process(delta: float) -> void:
 	if _exploded:
 		_tick_wave(delta)
+		return
+	if _priming:
 		return
 	_arm_left = max(0.0, _arm_left - delta)
 	velocity.y += GRAVITY * delta
@@ -59,24 +76,24 @@ func _physics_process(delta: float) -> void:
 	if collision != null:
 		var collider: Object = collision.get_collider()
 		if _arm_left <= 0.0 and collider != null and (collider as Node).is_in_group("player"):
-			_explode()
+			_prime_explode()
 			return
 		velocity = velocity.bounce(collision.get_normal()) * BOUNCE_DAMP
 
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D and global_position.distance_to((enemy as Node2D).global_position) <= CONTACT_RADIUS:
-			_explode()
+			_prime_explode()
 			return
 
 	if _arm_left <= 0.0:
 		var p := get_tree().get_first_node_in_group("player")
 		if p is Node2D and global_position.distance_to((p as Node2D).global_position) <= PLAYER_CONTACT_RADIUS:
-			_explode()
+			_prime_explode()
 			return
 
 	for f in get_tree().get_nodes_in_group("fruit"):
 		if f is Node2D and global_position.distance_to((f as Node2D).global_position) <= CONTACT_RADIUS + 3.0:
-			_explode()
+			_prime_explode()
 			return
 
 	_trail_timer -= delta
@@ -86,7 +103,7 @@ func _physics_process(delta: float) -> void:
 
 	_life_left -= delta
 	if _life_left <= 0.0:
-		_explode()
+		_prime_explode()
 
 
 func _explode() -> void:
