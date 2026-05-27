@@ -35,6 +35,9 @@ position = Vector2(797, 172)
 [node name="Floor5" parent="." instance=ExtResource("2_jyhfs")]
 position = Vector2(1115, 172)
 
+[node name="Floor6" parent="." instance=ExtResource("2_jyhfs")]
+position = Vector2(1625, -116)
+
 [node name="Platform" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(154, 116)
 
@@ -83,9 +86,6 @@ position = Vector2(408, 72)
 [node name="Wall20" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(4, 137)
 
-[node name="Wall21" parent="." instance=ExtResource("4_tefeu")]
-position = Vector2(1271, 137)
-
 [node name="Wall3" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(478, 9)
 
@@ -115,6 +115,33 @@ position = Vector2(941, 9)
 
 [node name="Wall19" parent="." instance=ExtResource("4_tefeu")]
 position = Vector2(941, 72)
+
+[node name="Wall22" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, 136)
+
+[node name="Wall23" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, -54)
+
+[node name="Wall25" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, -117)
+
+[node name="Wall26" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, -180)
+
+[node name="Wall27" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, -244)
+
+[node name="Wall28" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, -304)
+
+[node name="Wall29" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1413, 72)
+
+[node name="Wall24" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1469, -24)
+
+[node name="Wall30" parent="." instance=ExtResource("4_tefeu")]
+position = Vector2(1469, -88)
 
 [node name="Platform4" parent="." instance=ExtResource("3_tbgi4")]
 position = Vector2(514, -82)
@@ -176,11 +203,97 @@ position = Vector2(1033, -145)
 [node name="Platform23" parent="Platform24" instance=ExtResource("3_tbgi4")]
 position = Vector2(971, -145)
 
+[node name="Platform25" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1059, -64)
+
+[node name="Platform23" parent="Platform25" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform26" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1121, -64)
+
+[node name="Platform23" parent="Platform26" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform27" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1195, -8)
+
+[node name="Platform23" parent="Platform27" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform28" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1257, -8)
+
+[node name="Platform23" parent="Platform28" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform33" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1441, 43)
+
+[node name="Platform23" parent="Platform33" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform31" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1088, 50)
+
+[node name="Platform23" parent="Platform31" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform32" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1150, 50)
+
+[node name="Platform23" parent="Platform32" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform29" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1241, -71)
+
+[node name="Platform23" parent="Platform29" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform30" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1303, -71)
+
+[node name="Platform23" parent="Platform30" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform34" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1518, 94)
+
+[node name="Platform23" parent="Platform34" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
+[node name="Platform35" parent="." instance=ExtResource("3_tbgi4")]
+position = Vector2(1580, 94)
+
+[node name="Platform23" parent="Platform35" instance=ExtResource("3_tbgi4")]
+position = Vector2(971, -145)
+
 [node name="Slime" parent="." instance=ExtResource("5_tefeu")]
 position = Vector2(768, -56)
 
 [node name="SlimePurple" parent="." instance=ExtResource("6_o6xl0")]
 position = Vector2(692, 71)
+
+[node name="SlimePurple4" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(1117, 14)
+
+[node name="SlimePurple5" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(979, 126)
+
+[node name="SlimePurple6" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(1093, 124)
+
+[node name="SlimePurple8" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(1619, -159)
+max_health = 1
+
+[node name="SlimePurple7" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(1441, 13)
+
+[node name="SlimePurple9" parent="." instance=ExtResource("6_o6xl0")]
+position = Vector2(1653, -160)
+max_health = 1
 
 [node name="SlimePurple2" parent="." instance=ExtResource("6_o6xl0")]
 position = Vector2(591, 139)
@@ -199,3 +312,15 @@ position = Vector2(272, 81)
 
 [node name="Slime5" parent="." instance=ExtResource("5_tefeu")]
 position = Vector2(967, -172)
+
+[node name="Slime9" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(1572, -159)
+
+[node name="Slime6" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(1232, 117)
+
+[node name="Slime7" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(1142, 122)
+
+[node name="Slime8" parent="." instance=ExtResource("5_tefeu")]
+position = Vector2(1007, 134)
