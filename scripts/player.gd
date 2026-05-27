@@ -32,6 +32,7 @@ const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, -3.0)
 const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
 const THROW_OFFSET := Vector2(16.0, -6.0)
+const THROW_CHARGE_MAX := 5.0
 
 const MAX_HEALTH := 3
 const INVULN_TIME := 1.0
@@ -57,6 +58,8 @@ var _wall_attached_normal_x := 0.0
 var _health := MAX_HEALTH
 var _invuln_left := 0.0
 var _hp_label: Label
+var _throw_charging := false
+var _throw_charge := 0.0
 
 
 func _ready() -> void:
@@ -145,8 +148,20 @@ func _physics_process(delta: float) -> void:
 	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("shoot"):
 		_shoot()
 
-	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("throw"):
-		_throw_grenade()
+	if Input.is_action_just_pressed("throw") and not _throw_charging:
+		var existing := get_tree().get_first_node_in_group("grenade")
+		if existing != null and existing.has_method("detonate"):
+			existing.detonate()
+		elif _dash_time_left <= 0.0 and not _wall_attached:
+			_throw_charging = true
+			_throw_charge = 0.0
+	if _throw_charging:
+		if Input.is_action_pressed("throw"):
+			_throw_charge = min(_throw_charge + delta, THROW_CHARGE_MAX)
+		else:
+			_throw_grenade_charged(_throw_charge)
+			_throw_charging = false
+			_throw_charge = 0.0
 
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
 
@@ -384,14 +399,12 @@ func _shoot() -> void:
 	Audio.play_sfx("tap")
 
 
-func _throw_grenade() -> void:
-	var existing := get_tree().get_first_node_in_group("grenade")
-	if existing != null and existing.has_method("detonate"):
-		existing.detonate()
-		return
+func _throw_grenade_charged(charge_seconds: float) -> void:
 	var grenade := GRENADE_SCENE.instantiate()
 	grenade.position = global_position + Vector2(_facing * THROW_OFFSET.x, THROW_OFFSET.y)
 	grenade.direction = _facing
+	if grenade.has_method("set_charge"):
+		grenade.set_charge(charge_seconds)
 	get_parent().add_child(grenade)
 	Audio.play_sfx("tap")
 
