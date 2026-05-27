@@ -25,6 +25,12 @@ const WIND_UP_SCALE := Vector2(1.3, 0.7)
 const JUMP_SCALE := Vector2(0.75, 1.3)
 const LAND_SCALE := Vector2(1.35, 0.65)
 
+const HP_BAR_WIDTH := 16.0
+const HP_BAR_HEIGHT := 2.0
+const HP_BAR_TOP_Y := -14.0
+const HP_BAR_SHOW_TIME := 2.0
+const HP_BAR_FADE_TIME := 0.4
+
 enum State { WANDER, CHASE, WIND_UP, JUMP, LAND }
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -41,6 +47,9 @@ var _velocity_y := 0.0
 var _jump_dir := 0.0
 var _player_rid: RID = RID()
 var _health: int = 1
+var _hp_bar_bg: ColorRect
+var _hp_bar_fg: ColorRect
+var _hp_bar_visible_left := 0.0
 
 
 func _ready() -> void:
@@ -49,11 +58,71 @@ func _ready() -> void:
 	_initial_x = position.x
 	_initial_y = position.y
 	_health = max_health
+	_setup_hp_bar()
 	_pick_new_wander_direction()
+
+
+func _setup_hp_bar() -> void:
+	_hp_bar_bg = ColorRect.new()
+	_hp_bar_bg.color = Color(0.1, 0.0, 0.0, 0.85)
+	_hp_bar_bg.size = Vector2(HP_BAR_WIDTH, HP_BAR_HEIGHT)
+	_hp_bar_bg.position = Vector2(-HP_BAR_WIDTH / 2.0, HP_BAR_TOP_Y)
+	_hp_bar_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hp_bar_bg.visible = false
+	add_child(_hp_bar_bg)
+	_hp_bar_fg = ColorRect.new()
+	_hp_bar_fg.color = Color(0.3, 0.9, 0.3, 1.0)
+	_hp_bar_fg.size = Vector2(HP_BAR_WIDTH, HP_BAR_HEIGHT)
+	_hp_bar_fg.position = Vector2(-HP_BAR_WIDTH / 2.0, HP_BAR_TOP_Y)
+	_hp_bar_fg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hp_bar_fg.visible = false
+	add_child(_hp_bar_fg)
+
+
+func _refresh_hp_bar_size() -> void:
+	if _hp_bar_fg == null or max_health <= 0:
+		return
+	var t: float = clampf(float(_health) / float(max_health), 0.0, 1.0)
+	_hp_bar_fg.size.x = HP_BAR_WIDTH * t
+	if t > 0.5:
+		_hp_bar_fg.color = Color(0.3, 0.9, 0.3, 1.0)
+	elif t > 0.25:
+		_hp_bar_fg.color = Color(0.95, 0.8, 0.2, 1.0)
+	else:
+		_hp_bar_fg.color = Color(0.9, 0.25, 0.25, 1.0)
+
+
+func _show_hp_bar() -> void:
+	if _hp_bar_bg == null or _hp_bar_fg == null:
+		return
+	_hp_bar_visible_left = HP_BAR_SHOW_TIME
+	_hp_bar_bg.visible = true
+	_hp_bar_fg.visible = true
+	_hp_bar_bg.modulate.a = 1.0
+	_hp_bar_fg.modulate.a = 1.0
+
+
+func _tick_hp_bar(delta: float) -> void:
+	if _hp_bar_visible_left <= 0.0:
+		return
+	_hp_bar_visible_left -= delta
+	if _hp_bar_visible_left <= 0.0:
+		if _hp_bar_bg != null:
+			_hp_bar_bg.visible = false
+		if _hp_bar_fg != null:
+			_hp_bar_fg.visible = false
+	elif _hp_bar_visible_left < HP_BAR_FADE_TIME:
+		var a: float = _hp_bar_visible_left / HP_BAR_FADE_TIME
+		if _hp_bar_bg != null:
+			_hp_bar_bg.modulate.a = a
+		if _hp_bar_fg != null:
+			_hp_bar_fg.modulate.a = a
 
 
 func take_damage(amount: int = 1) -> void:
 	_health -= amount
+	_refresh_hp_bar_size()
+	_show_hp_bar()
 	if _health <= 0:
 		queue_free()
 
@@ -61,6 +130,7 @@ func take_damage(amount: int = 1) -> void:
 func _process(delta: float) -> void:
 	_hurt_cooldown_left = max(0.0, _hurt_cooldown_left - delta)
 	_aggro_left = max(0.0, _aggro_left - delta)
+	_tick_hp_bar(delta)
 
 	var player: Node2D = get_tree().get_first_node_in_group("player")
 	var dx: float = 0.0
