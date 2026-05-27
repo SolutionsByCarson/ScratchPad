@@ -3,7 +3,10 @@ extends CharacterBody2D
 const THROW_SPEED_X := 200.0
 const THROW_SPEED_Y := -180.0
 const GRAVITY := 700.0
-const EXPLOSION_RADIUS := 48.0
+const BASE_EXPLOSION_RADIUS := 48.0
+const CHARGE_RADIUS_PER_SEC := 20.0
+const CHARGE_MAX_TIME := 5.0
+const WAVE_SPEED := 260.0
 const CONTACT_RADIUS := 9.0
 const PLAYER_CONTACT_RADIUS := 12.0
 const PLAYER_DAMAGE := 2
@@ -14,20 +17,32 @@ const ARM_TIME := 0.15
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.28
 
-const BLAST_DURATION := 0.25
 const BLAST_COLOR := Color(1.0, 0.15, 0.15, 0.8)
 const BLAST_SEGMENTS := 32
 
 var direction: float = 1.0
+var explosion_radius: float = BASE_EXPLOSION_RADIUS
 var _trail_timer := 0.0
 var _life_left := LIFETIME
 var _arm_left := ARM_TIME
 var _exploded := false
+var _wave_radius := 0.0
+var _wave_duration := 0.0
+var _damaged: Array = []
 
 
 func _ready() -> void:
 	add_to_group("grenade")
 	velocity = Vector2(direction * THROW_SPEED_X, THROW_SPEED_Y)
+
+
+func set_charge(seconds: float) -> void:
+	var s: float = clampf(seconds, 0.0, CHARGE_MAX_TIME)
+	explosion_radius = BASE_EXPLOSION_RADIUS + s * CHARGE_RADIUS_PER_SEC
+	var visual: Polygon2D = get_node_or_null("Visual") as Polygon2D
+	if visual != null:
+		var t: float = s / CHARGE_MAX_TIME
+		visual.modulate = Color(1.0, 1.0 - 0.5 * t, 1.0 - 0.8 * t, 1.0)
 
 
 func detonate() -> void:
@@ -36,6 +51,7 @@ func detonate() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _exploded:
+		_tick_wave(delta)
 		return
 	_arm_left = max(0.0, _arm_left - delta)
 	velocity.y += GRAVITY * delta
@@ -77,21 +93,39 @@ func _explode() -> void:
 	if _exploded:
 		return
 	_exploded = true
+	_wave_duration = explosion_radius / WAVE_SPEED
+	_wave_radius = 0.0
 	Audio.play_sfx("explosion")
 	_spawn_explosion_ring()
+	remove_from_group("grenade")
+	var visual := get_node_or_null("Visual") as CanvasItem
+	if visual != null:
+		visual.visible = false
+	var cs := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if cs != null:
+		cs.set_deferred("disabled", true)
+
+
+func _tick_wave(delta: float) -> void:
+	_wave_radius = min(_wave_radius + WAVE_SPEED * delta, explosion_radius)
 	for enemy in get_tree().get_nodes_in_group("enemy"):
-		if enemy is Node2D:
-			var e: Node2D = enemy
-			if global_position.distance_to(e.global_position) <= EXPLOSION_RADIUS:
-				if e.has_method("take_damage"):
-					e.take_damage(ENEMY_DAMAGE)
-				else:
-					e.queue_free()
+		if _damaged.has(enemy):
+			continue
+		if enemy is Node2D and global_position.distance_to((enemy as Node2D).global_position) <= _wave_radius:
+			_damaged.append(enemy)
+			var e: Node = enemy
+			if e.has_method("take_damage"):
+				e.take_damage(ENEMY_DAMAGE)
+			else:
+				e.queue_free()
 	var player := get_tree().get_first_node_in_group("player")
-	if player is Node2D and player.has_method("take_damage"):
-		if global_position.distance_to((player as Node2D).global_position) <= EXPLOSION_RADIUS:
-			player.take_damage(PLAYER_DAMAGE)
-	queue_free()
+	if player != null and not _damaged.has(player):
+		if player is Node2D and global_position.distance_to((player as Node2D).global_position) <= _wave_radius:
+			_damaged.append(player)
+			if (player as Node).has_method("take_damage"):
+				(player as Node).take_damage(PLAYER_DAMAGE)
+	if _wave_radius >= explosion_radius:
+		queue_free()
 
 
 func _spawn_explosion_ring() -> void:
@@ -101,7 +135,7 @@ func _spawn_explosion_ring() -> void:
 	var pts: PackedVector2Array = []
 	for i in range(BLAST_SEGMENTS):
 		var a: float = TAU * float(i) / float(BLAST_SEGMENTS)
-		pts.append(Vector2(cos(a), sin(a)) * EXPLOSION_RADIUS)
+		pts.append(Vector2(cos(a), sin(a)) * explosion_radius)
 	var ring := Polygon2D.new()
 	ring.polygon = pts
 	ring.color = BLAST_COLOR
@@ -111,11 +145,10 @@ func _spawn_explosion_ring() -> void:
 	ring.global_position = global_position
 
 	var scale_tw := ring.create_tween()
-	scale_tw.tween_property(ring, "scale", Vector2.ONE, BLAST_DURATION) \
-		.set_trans(Tween.TRANS_BACK) \
-		.set_ease(Tween.EASE_OUT)
+	scale_tw.tween_property(ring, "scale", Vector2.ONE, _wave_duration) \
+		.set_trans(Tween.TRANS_LINEAR)
 
-	var flash_time: float = BLAST_DURATION / 6.0
+	var flash_time: float = _wave_duration / 6.0
 	var flash_tw := ring.create_tween()
 	flash_tw.tween_property(ring, "modulate:a", 0.25, flash_time)
 	flash_tw.tween_property(ring, "modulate:a", 1.0, flash_time)
