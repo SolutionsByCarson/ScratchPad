@@ -39,6 +39,18 @@ const MAX_HEALTH := 3
 const INVULN_TIME := 1.0
 const FALL_DEATH_Y := 350.0
 
+const SWING_DURATION := 0.22
+const SWING_COOLDOWN := 0.35
+const SWING_RANGE := 22.0
+const SWING_HEIGHT := 16.0
+const SWING_KNOCKBACK_ENEMY := 240.0
+const SWING_KNOCKBACK_GRENADE := 280.0
+const SWING_GRENADE_VY := -140.0
+const SWING_DAMAGE := 1
+const SWING_BAT_LENGTH := 20.0
+const SWING_BAT_THICKNESS := 5.0
+const SWING_BAT_COLOR := Color(0.75, 0.5, 0.2, 1.0)
+
 @onready var sprite: Sprite2D = $Sprite2D
 
 var _coyote_timer := 0.0
@@ -63,6 +75,8 @@ var _throw_charging := false
 var _throw_charge := 0.0
 var _last_charge_tick := 0
 var _charge_label: Label
+var _swing_cooldown_left := 0.0
+var _swing_visual: Polygon2D
 
 
 func _ready() -> void:
@@ -70,6 +84,22 @@ func _ready() -> void:
 	_setup_hp_ui()
 	_update_hp_ui()
 	_setup_charge_ui()
+	_setup_swing_visual()
+
+
+func _setup_swing_visual() -> void:
+	_swing_visual = Polygon2D.new()
+	_swing_visual.polygon = PackedVector2Array([
+		Vector2(0.0, -SWING_BAT_THICKNESS / 2.0),
+		Vector2(SWING_BAT_LENGTH, -SWING_BAT_THICKNESS / 2.0),
+		Vector2(SWING_BAT_LENGTH, SWING_BAT_THICKNESS / 2.0),
+		Vector2(0.0, SWING_BAT_THICKNESS / 2.0),
+	])
+	_swing_visual.color = SWING_BAT_COLOR
+	_swing_visual.z_index = 2
+	_swing_visual.position = Vector2(0.0, -2.0)
+	_swing_visual.visible = false
+	add_child(_swing_visual)
 
 
 func _setup_charge_ui() -> void:
@@ -167,6 +197,10 @@ func _physics_process(delta: float) -> void:
 
 	if not _wall_attached and _dash_time_left <= 0.0 and Input.is_action_just_pressed("shoot"):
 		_shoot()
+
+	_swing_cooldown_left = max(0.0, _swing_cooldown_left - delta)
+	if not _wall_attached and _dash_time_left <= 0.0 and _swing_cooldown_left <= 0.0 and Input.is_action_just_pressed("swing"):
+		_do_swing()
 
 	if Input.is_action_just_pressed("throw") and not _throw_charging:
 		var existing := get_tree().get_first_node_in_group("grenade")
@@ -437,6 +471,53 @@ func _throw_grenade_charged(charge_seconds: float) -> void:
 		grenade.set_charge(charge_seconds)
 	get_parent().add_child(grenade)
 	Audio.play_sfx("tap")
+
+
+func _do_swing() -> void:
+	_swing_cooldown_left = SWING_COOLDOWN
+	Audio.play_sfx("tap")
+
+	var start_rot: float = -PI / 2.0
+	var end_rot: float
+	if _facing >= 0.0:
+		end_rot = PI / 6.0
+	else:
+		end_rot = -PI - PI / 6.0
+	_swing_visual.rotation = start_rot
+	_swing_visual.visible = true
+	var tw := create_tween()
+	tw.tween_property(_swing_visual, "rotation", end_rot, SWING_DURATION) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tw.tween_callback(_hide_swing_visual)
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy is Node2D and _in_swing_arc(enemy as Node2D):
+			var e: Node = enemy
+			if e.has_method("apply_knockback"):
+				e.call("apply_knockback", _facing * SWING_KNOCKBACK_ENEMY)
+			if e.has_method("take_damage"):
+				e.call("take_damage", SWING_DAMAGE)
+
+	for g in get_tree().get_nodes_in_group("grenade"):
+		if g is Node2D and _in_swing_arc(g as Node2D):
+			var gn: Node = g
+			if gn.has_method("apply_knockback"):
+				gn.call("apply_knockback", _facing * SWING_KNOCKBACK_GRENADE, SWING_GRENADE_VY)
+
+
+func _in_swing_arc(target: Node2D) -> bool:
+	var dx: float = target.global_position.x - global_position.x
+	var dy: float = target.global_position.y - global_position.y
+	if absf(dx) > SWING_RANGE or absf(dy) > SWING_HEIGHT:
+		return false
+	if dx == 0.0:
+		return true
+	return signf(dx) == signf(_facing)
+
+
+func _hide_swing_visual() -> void:
+	if _swing_visual != null:
+		_swing_visual.visible = false
 
 
 func _do_slam_damage() -> void:

@@ -31,6 +31,8 @@ const HP_BAR_TOP_Y := -14.0
 const HP_BAR_SHOW_TIME := 2.0
 const HP_BAR_FADE_TIME := 0.4
 
+const KNOCKBACK_DECAY := 600.0
+
 enum State { WANDER, CHASE, WIND_UP, JUMP, LAND }
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -50,6 +52,7 @@ var _health: int = 1
 var _hp_bar_bg: ColorRect
 var _hp_bar_fg: ColorRect
 var _hp_bar_visible_left := 0.0
+var _knockback_vx := 0.0
 
 
 func _ready() -> void:
@@ -127,10 +130,22 @@ func take_damage(amount: int = 1) -> void:
 		queue_free()
 
 
+func apply_knockback(vx: float) -> void:
+	_knockback_vx = vx
+	_state = State.WANDER
+	_velocity_y = 0.0
+	_jump_dir = 0.0
+
+
 func _process(delta: float) -> void:
 	_hurt_cooldown_left = max(0.0, _hurt_cooldown_left - delta)
 	_aggro_left = max(0.0, _aggro_left - delta)
 	_tick_hp_bar(delta)
+
+	if _tick_knockback(delta):
+		position.x = clamp(position.x, WORLD_MIN_X, WORLD_MAX_X)
+		sprite.scale = NORMAL_SCALE
+		return
 
 	var player: Node2D = get_tree().get_first_node_in_group("player")
 	var dx: float = 0.0
@@ -247,6 +262,19 @@ func _do_chase(delta: float, dx: float) -> void:
 
 	position.x = next_x
 	sprite.flip_h = move_dir < 0.0
+
+
+func _tick_knockback(delta: float) -> bool:
+	if absf(_knockback_vx) < 1.0:
+		_knockback_vx = 0.0
+		return false
+	position.x += _knockback_vx * delta
+	var decay: float = signf(_knockback_vx) * KNOCKBACK_DECAY * delta
+	if absf(_knockback_vx) <= absf(decay):
+		_knockback_vx = 0.0
+	else:
+		_knockback_vx -= decay
+	return true
 
 
 func _has_ground_at(x: float) -> bool:

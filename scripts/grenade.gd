@@ -55,6 +55,12 @@ func detonate() -> void:
 	_prime_explode()
 
 
+func apply_knockback(vx: float, vy: float = -120.0) -> void:
+	if _exploded or _priming:
+		return
+	velocity = Vector2(vx, vy)
+
+
 func _prime_explode() -> void:
 	if _exploded or _priming:
 		return
