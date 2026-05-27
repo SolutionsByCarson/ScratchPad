@@ -60,12 +60,32 @@ var _invuln_left := 0.0
 var _hp_label: Label
 var _throw_charging := false
 var _throw_charge := 0.0
+var _last_charge_tick := 0
+var _charge_label: Label2D
 
 
 func _ready() -> void:
 	add_to_group("player")
 	_setup_hp_ui()
 	_update_hp_ui()
+	_setup_charge_ui()
+
+
+func _setup_charge_ui() -> void:
+	_charge_label = Label2D.new()
+	var font: Font = load("res://assets/fonts/PixelOperator8-Bold.ttf")
+	if font != null:
+		_charge_label.font = font
+	_charge_label.font_size = 16
+	_charge_label.outline_size = 2
+	_charge_label.outline_modulate = Color.BLACK
+	_charge_label.modulate = Color(1.0, 0.85, 0.25, 1.0)
+	_charge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_charge_label.position = Vector2(0, -22)
+	_charge_label.scale = Vector2(0.5, 0.5)
+	_charge_label.text = "0"
+	_charge_label.visible = false
+	add_child(_charge_label)
 
 
 func _setup_hp_ui() -> void:
@@ -155,13 +175,25 @@ func _physics_process(delta: float) -> void:
 		elif _dash_time_left <= 0.0 and not _wall_attached:
 			_throw_charging = true
 			_throw_charge = 0.0
+			_last_charge_tick = 0
+			if _charge_label != null:
+				_charge_label.text = "0"
+				_charge_label.visible = true
 	if _throw_charging:
 		if Input.is_action_pressed("throw"):
 			_throw_charge = min(_throw_charge + delta, THROW_CHARGE_MAX)
+			var charge_int: int = int(floor(_throw_charge))
+			if charge_int != _last_charge_tick:
+				_last_charge_tick = charge_int
+				Audio.play_sfx("coin")
+			if _charge_label != null:
+				_charge_label.text = str(charge_int)
 		else:
 			_throw_grenade_charged(_throw_charge)
 			_throw_charging = false
 			_throw_charge = 0.0
+			if _charge_label != null:
+				_charge_label.visible = false
 
 	_dash_cooldown_left = max(0.0, _dash_cooldown_left - delta)
 
