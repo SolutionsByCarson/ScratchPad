@@ -39,15 +39,13 @@ const MAX_HEALTH := 3
 const INVULN_TIME := 1.0
 const FALL_DEATH_Y := 350.0
 
-const SWING_DURATION := 0.22
-const SWING_COOLDOWN := 0.35
-const SWING_RANGE := 22.0
-const SWING_HEIGHT := 16.0
-const SWING_KNOCKBACK_ENEMY := 240.0
-const SWING_KNOCKBACK_GRENADE := 280.0
-const SWING_GRENADE_VY := -140.0
+const SWING_DURATION := 0.13
+const SWING_COOLDOWN := 0.28
+const SWING_REACH := 36.0
+const SWING_KNOCKBACK_ENEMY := 320.0
+const SWING_KNOCKBACK_GRENADE := 360.0
 const SWING_DAMAGE := 1
-const SWING_BAT_LENGTH := 20.0
+const SWING_BAT_LENGTH := 30.0
 const SWING_BAT_THICKNESS := 5.0
 const SWING_BAT_COLOR := Color(0.75, 0.5, 0.2, 1.0)
 
@@ -493,26 +491,34 @@ func _do_swing() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D and _in_swing_arc(enemy as Node2D):
 			var e: Node = enemy
+			var dir: Vector2 = _knockback_dir(enemy as Node2D)
 			if e.has_method("apply_knockback"):
-				e.call("apply_knockback", _facing * SWING_KNOCKBACK_ENEMY)
+				e.call("apply_knockback", dir.x * SWING_KNOCKBACK_ENEMY, dir.y * SWING_KNOCKBACK_ENEMY)
 			if e.has_method("take_damage"):
 				e.call("take_damage", SWING_DAMAGE)
 
 	for g in get_tree().get_nodes_in_group("grenade"):
 		if g is Node2D and _in_swing_arc(g as Node2D):
 			var gn: Node = g
+			var dir: Vector2 = _knockback_dir(g as Node2D)
 			if gn.has_method("apply_knockback"):
-				gn.call("apply_knockback", _facing * SWING_KNOCKBACK_GRENADE, SWING_GRENADE_VY)
+				gn.call("apply_knockback", dir.x * SWING_KNOCKBACK_GRENADE, dir.y * SWING_KNOCKBACK_GRENADE)
 
 
 func _in_swing_arc(target: Node2D) -> bool:
-	var dx: float = target.global_position.x - global_position.x
-	var dy: float = target.global_position.y - global_position.y
-	if absf(dx) > SWING_RANGE or absf(dy) > SWING_HEIGHT:
+	var to_target: Vector2 = target.global_position - global_position
+	if to_target.length() > SWING_REACH:
 		return false
-	if dx == 0.0:
+	if absf(to_target.x) < 4.0:
 		return true
-	return signf(dx) == signf(_facing)
+	return signf(to_target.x) == signf(_facing)
+
+
+func _knockback_dir(target: Node2D) -> Vector2:
+	var to_target: Vector2 = target.global_position - global_position
+	if to_target.length() < 0.01:
+		return Vector2(_facing, -0.25).normalized()
+	return to_target.normalized()
 
 
 func _hide_swing_visual() -> void:

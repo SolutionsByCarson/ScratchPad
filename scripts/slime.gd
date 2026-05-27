@@ -53,6 +53,7 @@ var _hp_bar_bg: ColorRect
 var _hp_bar_fg: ColorRect
 var _hp_bar_visible_left := 0.0
 var _knockback_vx := 0.0
+var _knockback_vy := 0.0
 
 
 func _ready() -> void:
@@ -130,8 +131,9 @@ func take_damage(amount: int = 1) -> void:
 		queue_free()
 
 
-func apply_knockback(vx: float) -> void:
+func apply_knockback(vx: float, vy: float = 0.0) -> void:
 	_knockback_vx = vx
+	_knockback_vy = vy
 	_state = State.WANDER
 	_velocity_y = 0.0
 	_jump_dir = 0.0
@@ -265,15 +267,25 @@ func _do_chase(delta: float, dx: float) -> void:
 
 
 func _tick_knockback(delta: float) -> bool:
-	if absf(_knockback_vx) < 1.0:
+	if absf(_knockback_vx) < 1.0 and absf(_knockback_vy) < 1.0:
 		_knockback_vx = 0.0
+		_knockback_vy = 0.0
 		return false
 	position.x += _knockback_vx * delta
+	position.y += _knockback_vy * delta
+	_knockback_vy += GRAVITY * delta
 	var decay: float = signf(_knockback_vx) * KNOCKBACK_DECAY * delta
 	if absf(_knockback_vx) <= absf(decay):
 		_knockback_vx = 0.0
 	else:
 		_knockback_vx -= decay
+	if _knockback_vy > 0.0:
+		var ground_y: float = _ground_y_below(position.x, position.y - 8.0)
+		if ground_y != INF and position.y + GROUND_OFFSET >= ground_y:
+			position.y = ground_y - GROUND_OFFSET
+			_knockback_vy = 0.0
+			_initial_x = position.x
+			_initial_y = position.y
 	return true
 
 
