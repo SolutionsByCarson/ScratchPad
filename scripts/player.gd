@@ -61,7 +61,7 @@ var _hp_label: Label
 var _throw_charging := false
 var _throw_charge := 0.0
 var _last_charge_tick := 0
-var _charge_label: Label2D
+var _charge_label: Label
 
 
 func _ready() -> void:
@@ -72,16 +72,15 @@ func _ready() -> void:
 
 
 func _setup_charge_ui() -> void:
-	_charge_label = Label2D.new()
+	_charge_label = Label.new()
 	var font: Font = load("res://assets/fonts/PixelOperator8-Bold.ttf")
 	if font != null:
-		_charge_label.font = font
-	_charge_label.font_size = 16
-	_charge_label.outline_size = 2
-	_charge_label.outline_modulate = Color.BLACK
-	_charge_label.modulate = Color(1.0, 0.85, 0.25, 1.0)
-	_charge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_charge_label.position = Vector2(0, -22)
+		_charge_label.add_theme_font_override("font", font)
+	_charge_label.add_theme_font_size_override("font_size", 16)
+	_charge_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
+	_charge_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_charge_label.add_theme_constant_override("outline_size", 2)
+	_charge_label.position = Vector2(-4, -28)
 	_charge_label.scale = Vector2(0.5, 0.5)
 	_charge_label.text = "0"
 	_charge_label.visible = false
