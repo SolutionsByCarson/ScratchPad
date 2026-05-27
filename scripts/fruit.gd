@@ -4,6 +4,7 @@ const SPEED := 250.0
 const LIFETIME := 1.5
 const TRAIL_INTERVAL := 0.04
 const TRAIL_DURATION := 0.22
+const DAMAGE := 1
 
 var direction: float = 1.0
 var _life_left := LIFETIME
@@ -38,7 +39,7 @@ func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemy"):
 		Audio.play_sfx("explosion")
 		if area.has_method("take_damage"):
-			area.take_damage(1)
+			area.take_damage(DAMAGE)
 		else:
 			area.queue_free()
 		queue_free()
