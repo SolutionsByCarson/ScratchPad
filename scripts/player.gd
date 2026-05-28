@@ -551,9 +551,9 @@ func _do_grenade_lob(dir: Vector2, charge_seconds: float) -> void:
 	var grenade := GRENADE_SCENE.instantiate()
 	grenade.position = global_position + Vector2(_facing * 2.0, -10.0)
 	grenade.direction = 0.0
+	get_parent().add_child(grenade)
 	if grenade.has_method("set_player_safe"):
 		grenade.set_player_safe(true)
-	get_parent().add_child(grenade)
 	if grenade.has_method("apply_knockback"):
 		grenade.apply_knockback(0.0, -90.0)
 	Audio.play_sfx("tap")
