@@ -65,6 +65,10 @@ func apply_knockback(vx: float, vy: float = 0.0) -> void:
 
 func set_player_safe(safe: bool) -> void:
 	_player_safe = safe
+	if safe:
+		var player := get_tree().get_first_node_in_group("player")
+		if player is PhysicsBody2D:
+			add_collision_exception_with(player)
 
 
 func _prime_explode() -> void:
