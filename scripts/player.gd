@@ -41,13 +41,19 @@ const FALL_DEATH_Y := 350.0
 
 const SWING_DURATION := 0.13
 const SWING_COOLDOWN := 0.28
-const SWING_REACH := 36.0
-const SWING_KNOCKBACK_ENEMY := 320.0
-const SWING_KNOCKBACK_GRENADE := 360.0
+const SWING_REACH_BASE := 36.0
+const SWING_REACH_PER_CHARGE := 4.0
+const SWING_KNOCKBACK_ENEMY_BASE := 320.0
+const SWING_KNOCKBACK_GRENADE_BASE := 360.0
+const SWING_CHARGE_MAX := 5.0
+const SWING_CHARGE_KB_MULT_PER_SEC := 0.4
 const SWING_DAMAGE := 1
 const SWING_BAT_LENGTH := 30.0
 const SWING_BAT_THICKNESS := 5.0
 const SWING_BAT_COLOR := Color(0.75, 0.5, 0.2, 1.0)
+const SWING_BAT_FULL_COLOR := Color(1.0, 0.3, 0.15, 1.0)
+const SWING_LOB_BASE_SPEED := 460.0
+const SWING_LOB_MULT_PER_SEC := 0.3
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -75,6 +81,9 @@ var _last_charge_tick := 0
 var _charge_label: Label
 var _swing_cooldown_left := 0.0
 var _swing_visual: Polygon2D
+var _swing_charging := false
+var _swing_charge := 0.0
+var _last_swing_tick := 0
 
 
 func _ready() -> void:
@@ -197,18 +206,50 @@ func _physics_process(delta: float) -> void:
 		_shoot()
 
 	_swing_cooldown_left = max(0.0, _swing_cooldown_left - delta)
-	if not _wall_attached and _dash_time_left <= 0.0 and _swing_cooldown_left <= 0.0 and Input.is_action_just_pressed("swing"):
-		_do_swing()
-
-	if Input.is_action_just_pressed("throw") and not _throw_charging:
-		var existing := get_tree().get_first_node_in_group("grenade")
-		if existing == null and _dash_time_left <= 0.0 and not _wall_attached:
-			_throw_charging = true
-			_throw_charge = 0.0
-			_last_charge_tick = 0
+	if Input.is_action_just_pressed("swing") and not _swing_charging and not _throw_charging \
+			and not _wall_attached and _dash_time_left <= 0.0 and _swing_cooldown_left <= 0.0:
+		_swing_charging = true
+		_swing_charge = 0.0
+		_last_swing_tick = 0
+		if _charge_label != null:
+			_charge_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3, 1.0))
+			_charge_label.text = "0"
+			_charge_label.visible = true
+	if _swing_charging:
+		if Input.is_action_pressed("swing"):
+			_swing_charge = min(_swing_charge + delta, SWING_CHARGE_MAX)
+			var sci: int = int(floor(_swing_charge))
+			if sci != _last_swing_tick:
+				_last_swing_tick = sci
+				Audio.play_sfx("power_up")
 			if _charge_label != null:
-				_charge_label.text = "0"
-				_charge_label.visible = true
+				_charge_label.text = str(sci)
+		else:
+			_do_swing(_swing_charge)
+			_swing_charging = false
+			_swing_charge = 0.0
+			if _charge_label != null:
+				_charge_label.visible = false
+
+	if Input.is_action_just_pressed("throw"):
+		if _swing_charging:
+			var existing_g := get_tree().get_first_node_in_group("grenade")
+			if existing_g == null:
+				_do_grenade_lob(_get_swing_direction(), _swing_charge)
+				_swing_charging = false
+				_swing_charge = 0.0
+				if _charge_label != null:
+					_charge_label.visible = false
+		elif not _throw_charging:
+			var existing := get_tree().get_first_node_in_group("grenade")
+			if existing == null and _dash_time_left <= 0.0 and not _wall_attached:
+				_throw_charging = true
+				_throw_charge = 0.0
+				_last_charge_tick = 0
+				if _charge_label != null:
+					_charge_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
+					_charge_label.text = "0"
+					_charge_label.visible = true
 	if _throw_charging:
 		if Input.is_action_pressed("throw"):
 			_throw_charge = min(_throw_charge + delta, THROW_CHARGE_MAX)
@@ -471,54 +512,86 @@ func _throw_grenade_charged(charge_seconds: float) -> void:
 	Audio.play_sfx("tap")
 
 
-func _do_swing() -> void:
+func _do_swing(charge_seconds: float) -> void:
 	_swing_cooldown_left = SWING_COOLDOWN
 	Audio.play_sfx("tap")
+	var dir: Vector2 = _get_swing_direction()
+	_animate_bat(dir, charge_seconds)
 
-	var start_rot: float = -PI / 2.0
+	var charge_mult: float = 1.0 + charge_seconds * SWING_CHARGE_KB_MULT_PER_SEC
+	var reach: float = SWING_REACH_BASE + charge_seconds * SWING_REACH_PER_CHARGE
+	var enemy_kb: float = SWING_KNOCKBACK_ENEMY_BASE * charge_mult
+	var grenade_kb: float = SWING_KNOCKBACK_GRENADE_BASE * charge_mult
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy is Node2D and _in_swing_arc(enemy as Node2D, dir, reach):
+			var e: Node = enemy
+			if e.has_method("apply_knockback"):
+				e.call("apply_knockback", dir.x * enemy_kb, dir.y * enemy_kb)
+			if e.has_method("take_damage"):
+				e.call("take_damage", SWING_DAMAGE)
+
+	for g in get_tree().get_nodes_in_group("grenade"):
+		if g is Node2D and _in_swing_arc(g as Node2D, dir, reach):
+			var gn: Node = g
+			if gn.has_method("apply_knockback"):
+				gn.call("apply_knockback", dir.x * grenade_kb, dir.y * grenade_kb)
+
+
+func _do_grenade_lob(dir: Vector2, charge_seconds: float) -> void:
+	var grenade := GRENADE_SCENE.instantiate()
+	grenade.position = global_position + Vector2(0.0, -8.0)
+	grenade.direction = 0.0
+	get_parent().add_child(grenade)
+	Audio.play_sfx("tap")
+	var lob_speed: float = SWING_LOB_BASE_SPEED * (1.0 + charge_seconds * SWING_LOB_MULT_PER_SEC)
+	if grenade.has_method("apply_knockback"):
+		grenade.apply_knockback(dir.x * lob_speed, dir.y * lob_speed)
+	_animate_bat(dir, charge_seconds)
+	_swing_cooldown_left = SWING_COOLDOWN
+
+
+func _animate_bat(dir: Vector2, charge_seconds: float) -> void:
+	var start_rot: float
 	var end_rot: float
-	if _facing >= 0.0:
-		end_rot = PI / 6.0
-	else:
+	if dir.y < -0.5:
+		start_rot = -3.0 * PI / 4.0
+		end_rot = -PI / 4.0
+	elif dir.y > 0.5:
+		start_rot = 3.0 * PI / 4.0
+		end_rot = PI / 4.0
+	elif dir.x < 0.0:
+		start_rot = -PI / 2.0
 		end_rot = -PI - PI / 6.0
+	else:
+		start_rot = -PI / 2.0
+		end_rot = PI / 6.0
 	_swing_visual.rotation = start_rot
 	_swing_visual.visible = true
+	var t: float = clampf(charge_seconds / SWING_CHARGE_MAX, 0.0, 1.0)
+	_swing_visual.color = SWING_BAT_COLOR.lerp(SWING_BAT_FULL_COLOR, t)
+	_swing_visual.scale = Vector2(1.0 + t * 0.3, 1.0 + t * 0.2)
 	var tw := create_tween()
 	tw.tween_property(_swing_visual, "rotation", end_rot, SWING_DURATION) \
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.tween_callback(_hide_swing_visual)
 
-	for enemy in get_tree().get_nodes_in_group("enemy"):
-		if enemy is Node2D and _in_swing_arc(enemy as Node2D):
-			var e: Node = enemy
-			var dir: Vector2 = _knockback_dir(enemy as Node2D)
-			if e.has_method("apply_knockback"):
-				e.call("apply_knockback", dir.x * SWING_KNOCKBACK_ENEMY, dir.y * SWING_KNOCKBACK_ENEMY)
-			if e.has_method("take_damage"):
-				e.call("take_damage", SWING_DAMAGE)
 
-	for g in get_tree().get_nodes_in_group("grenade"):
-		if g is Node2D and _in_swing_arc(g as Node2D):
-			var gn: Node = g
-			var dir: Vector2 = _knockback_dir(g as Node2D)
-			if gn.has_method("apply_knockback"):
-				gn.call("apply_knockback", dir.x * SWING_KNOCKBACK_GRENADE, dir.y * SWING_KNOCKBACK_GRENADE)
+func _get_swing_direction() -> Vector2:
+	if Input.is_action_pressed("jump"):
+		return Vector2(0.0, -1.0)
+	if Input.is_action_pressed("slam"):
+		return Vector2(0.0, 1.0)
+	return Vector2(_facing, 0.0)
 
 
-func _in_swing_arc(target: Node2D) -> bool:
+func _in_swing_arc(target: Node2D, dir: Vector2, reach: float) -> bool:
 	var to_target: Vector2 = target.global_position - global_position
-	if to_target.length() > SWING_REACH:
+	if to_target.length() > reach:
 		return false
-	if absf(to_target.x) < 4.0:
-		return true
-	return signf(to_target.x) == signf(_facing)
-
-
-func _knockback_dir(target: Node2D) -> Vector2:
-	var to_target: Vector2 = target.global_position - global_position
 	if to_target.length() < 0.01:
-		return Vector2(_facing, -0.25).normalized()
-	return to_target.normalized()
+		return true
+	return to_target.normalized().dot(dir) > 0.0
 
 
 func _hide_swing_visual() -> void:

@@ -132,8 +132,8 @@ func take_damage(amount: int = 1) -> void:
 
 
 func apply_knockback(vx: float, vy: float = 0.0) -> void:
-	_knockback_vx = vx
-	_knockback_vy = vy
+	_knockback_vx += vx
+	_knockback_vy += vy
 	_state = State.WANDER
 	_velocity_y = 0.0
 	_jump_dir = 0.0

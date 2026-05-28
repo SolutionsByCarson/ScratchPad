@@ -39,7 +39,8 @@ var _blink_tween: Tween
 
 func _ready() -> void:
 	add_to_group("grenade")
-	velocity = Vector2(direction * THROW_SPEED_X, THROW_SPEED_Y)
+	if direction != 0.0:
+		velocity = Vector2(direction * THROW_SPEED_X, THROW_SPEED_Y)
 
 
 func set_charge(seconds: float) -> void:
@@ -55,10 +56,10 @@ func detonate() -> void:
 	_prime_explode()
 
 
-func apply_knockback(vx: float, vy: float = -120.0) -> void:
+func apply_knockback(vx: float, vy: float = 0.0) -> void:
 	if _exploded or _priming:
 		return
-	velocity = Vector2(vx, vy)
+	velocity += Vector2(vx, vy)
 
 
 func _prime_explode() -> void:
