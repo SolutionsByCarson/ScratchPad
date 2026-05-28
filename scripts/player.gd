@@ -34,7 +34,7 @@ const FRUIT_SCENE := preload("res://scenes/fruit.tscn")
 const SHOOT_OFFSET := Vector2(12.0, -3.0)
 const GRENADE_SCENE := preload("res://scenes/grenade.tscn")
 const THROW_OFFSET := Vector2(16.0, -6.0)
-const THROW_CHARGE_MAX := 5.0
+const THROW_CHARGE_MAX := 3.0
 
 const MAX_HEALTH := 3
 const INVULN_TIME := 1.0
