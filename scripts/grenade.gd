@@ -35,6 +35,7 @@ var _wave_duration := 0.0
 var _damaged: Array = []
 var _blink_started := false
 var _blink_tween: Tween
+var _player_safe := false
 
 
 func _ready() -> void:
@@ -60,6 +61,10 @@ func apply_knockback(vx: float, vy: float = 0.0) -> void:
 	if _exploded or _priming:
 		return
 	velocity += Vector2(vx, vy)
+
+
+func set_player_safe(safe: bool) -> void:
+	_player_safe = safe
 
 
 func _prime_explode() -> void:
@@ -104,7 +109,7 @@ func _physics_process(delta: float) -> void:
 		var collider_node: Node = collider as Node
 		var player_contact: bool = collider_node != null and collider_node.is_in_group("player")
 		var dodging: bool = player_contact and collider_node.is_in_group("dashing")
-		if _arm_left <= 0.0 and player_contact and not dodging:
+		if _arm_left <= 0.0 and player_contact and not dodging and not _player_safe:
 			_prime_explode()
 			return
 		velocity = velocity.bounce(collision.get_normal()) * BOUNCE_DAMP
@@ -114,7 +119,7 @@ func _physics_process(delta: float) -> void:
 			_prime_explode()
 			return
 
-	if _arm_left <= 0.0:
+	if _arm_left <= 0.0 and not _player_safe:
 		var p := get_tree().get_first_node_in_group("player")
 		if p is Node2D and not (p as Node).is_in_group("dashing") \
 				and global_position.distance_to((p as Node2D).global_position) <= PLAYER_CONTACT_RADIUS:

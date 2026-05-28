@@ -544,20 +544,30 @@ func _do_swing(charge_seconds: float) -> void:
 			var gn: Node = g
 			if gn.has_method("apply_knockback"):
 				gn.call("apply_knockback", dir.x * grenade_kb, dir.y * grenade_kb)
+				Audio.play_sfx_layered("power_up")
 
 
 func _do_grenade_lob(dir: Vector2, charge_seconds: float) -> void:
 	var grenade := GRENADE_SCENE.instantiate()
-	grenade.position = global_position + Vector2(0.0, -8.0)
+	grenade.position = global_position + Vector2(_facing * 2.0, -10.0)
 	grenade.direction = 0.0
+	if grenade.has_method("set_player_safe"):
+		grenade.set_player_safe(true)
 	get_parent().add_child(grenade)
-	Audio.play_sfx("tap")
-	Audio.play_sfx_layered("power_up")
-	var lob_speed: float = SWING_LOB_BASE_SPEED * (1.0 + charge_seconds * SWING_LOB_MULT_PER_SEC)
 	if grenade.has_method("apply_knockback"):
-		grenade.apply_knockback(dir.x * lob_speed, dir.y * lob_speed)
+		grenade.apply_knockback(0.0, -90.0)
+	Audio.play_sfx("tap")
 	_animate_bat(dir, charge_seconds)
 	_swing_cooldown_left = SWING_COOLDOWN
+	var lob_speed: float = SWING_LOB_BASE_SPEED * (1.0 + charge_seconds * SWING_LOB_MULT_PER_SEC)
+	var grenade_ref: Node = grenade
+	get_tree().create_timer(SWING_DURATION * 0.5).timeout.connect(func() -> void:
+		if not is_instance_valid(grenade_ref):
+			return
+		if grenade_ref.has_method("apply_knockback"):
+			grenade_ref.call("apply_knockback", dir.x * lob_speed, dir.y * lob_speed)
+			Audio.play_sfx_layered("power_up")
+	)
 
 
 func _animate_bat(dir: Vector2, charge_seconds: float) -> void:
