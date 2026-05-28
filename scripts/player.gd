@@ -8,6 +8,7 @@ const JUMP_BUFFER := 0.10
 const DASH_SPEED := 320.0
 const DASH_DURATION := 0.17
 const DASH_COOLDOWN := 0.5
+const DASH_DODGE_GRACE := 0.08
 
 const WALL_STICK_TIME := 0.20
 const WALL_SLIDE_MAX_FALL := 80.0
@@ -62,6 +63,7 @@ var _jump_buffer_timer := 0.0
 var _facing := 1.0
 var _dash_time_left := 0.0
 var _dash_cooldown_left := 0.0
+var _dash_grace_left := 0.0
 var _wall_stick_left := WALL_STICK_TIME
 var _wall_jump_lock_left := 0.0
 var _slamming := false
@@ -274,6 +276,7 @@ func _physics_process(delta: float) -> void:
 			sprite.flip_h = input_dir < 0.0
 		_dash_time_left = DASH_DURATION
 		_dash_cooldown_left = DASH_COOLDOWN
+		_dash_grace_left = 0.0
 		_afterimage_timer = 0.0
 		add_to_group("dashing")
 		Audio.play_sfx("power_up")
@@ -288,8 +291,13 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 		move_and_slide()
 		if _dash_time_left <= 0.0:
-			remove_from_group("dashing")
+			_dash_grace_left = DASH_DODGE_GRACE
 		return
+
+	if _dash_grace_left > 0.0:
+		_dash_grace_left -= delta
+		if _dash_grace_left <= 0.0 and is_in_group("dashing"):
+			remove_from_group("dashing")
 
 	if is_on_floor() and Input.is_action_just_pressed("slam") and _is_on_one_way_platform():
 		global_position.y += 2.0
