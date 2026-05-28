@@ -23,6 +23,11 @@ const PRIME_DELAY := 0.09
 const TIMEOUT_BLINK_DURATION := 0.6
 const TIMEOUT_BLINK_COUNT := 3
 
+const KNOCKBACK_DURATION := 0.18
+const GRAVITY_SUSPEND_DURATION := 0.12
+const GROUNDED_AUTO_LIFT_VY := -160.0
+const GROUND_PROBE_DISTANCE := 7.0
+
 var direction: float = 1.0
 var explosion_radius: float = BASE_EXPLOSION_RADIUS
 var _trail_timer := 0.0
@@ -36,6 +41,8 @@ var _damaged: Array = []
 var _blink_started := false
 var _blink_tween: Tween
 var _player_safe := false
+var _knockback_timer := 0.0
+var _gravity_suspend_timer := 0.0
 
 
 func _ready() -> void:
@@ -60,7 +67,27 @@ func detonate() -> void:
 func apply_knockback(vx: float, vy: float = 0.0) -> void:
 	if _exploded or _priming:
 		return
-	velocity += Vector2(vx, vy)
+	var grounded: bool = _check_grounded()
+	var kb_y: float = vy
+	if grounded:
+		# Auto-lift so a flat horizontal swing still pops a resting grenade off the floor.
+		kb_y = min(kb_y, GROUNDED_AUTO_LIFT_VY)
+		velocity = Vector2(vx, kb_y)
+	else:
+		velocity += Vector2(vx, kb_y)
+	_knockback_timer = KNOCKBACK_DURATION
+	_gravity_suspend_timer = GRAVITY_SUSPEND_DURATION
+
+
+func _check_grounded() -> bool:
+	var space := get_world_2d().direct_space_state
+	var origin: Vector2 = global_position
+	var target: Vector2 = origin + Vector2(0.0, GROUND_PROBE_DISTANCE)
+	var query := PhysicsRayQueryParameters2D.create(origin, target)
+	query.exclude = [self]
+	query.collide_with_areas = false
+	var hit: Dictionary = space.intersect_ray(query)
+	return not hit.is_empty()
 
 
 func set_player_safe(safe: bool) -> void:
@@ -115,7 +142,10 @@ func _physics_process(delta: float) -> void:
 	if _priming:
 		return
 	_arm_left = max(0.0, _arm_left - delta)
-	velocity.y += GRAVITY * delta
+	_knockback_timer = max(0.0, _knockback_timer - delta)
+	_gravity_suspend_timer = max(0.0, _gravity_suspend_timer - delta)
+	if _gravity_suspend_timer <= 0.0:
+		velocity.y += GRAVITY * delta
 	var collision := move_and_collide(velocity * delta)
 	if collision != null:
 		var collider: Object = collision.get_collider()
@@ -125,7 +155,12 @@ func _physics_process(delta: float) -> void:
 		if _arm_left <= 0.0 and player_contact and not dodging and not _player_safe:
 			_prime_explode(collider_node)
 			return
-		velocity = velocity.bounce(collision.get_normal()) * BOUNCE_DAMP
+		if _knockback_timer > 0.0:
+			# Slide along the surface instead of bouncing, so the floor doesn't eat
+			# the horizontal energy of a fresh knockback impulse.
+			velocity = velocity.slide(collision.get_normal())
+		else:
+			velocity = velocity.bounce(collision.get_normal()) * BOUNCE_DAMP
 
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D and global_position.distance_to((enemy as Node2D).global_position) <= CONTACT_RADIUS:

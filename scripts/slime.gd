@@ -32,6 +32,7 @@ const HP_BAR_SHOW_TIME := 2.0
 const HP_BAR_FADE_TIME := 0.4
 
 const KNOCKBACK_DECAY := 600.0
+const GROUNDED_AUTO_LIFT_VY := -160.0
 
 enum State { WANDER, CHASE, WIND_UP, JUMP, LAND }
 
@@ -132,8 +133,15 @@ func take_damage(amount: int = 1) -> void:
 
 
 func apply_knockback(vx: float, vy: float = 0.0) -> void:
-	_knockback_vx += vx
-	_knockback_vy += vy
+	var resting: bool = _state != State.JUMP and absf(_knockback_vx) < 1.0 and absf(_knockback_vy) < 1.0
+	var kb_y: float = vy
+	if resting:
+		kb_y = min(kb_y, GROUNDED_AUTO_LIFT_VY)
+		_knockback_vx = vx
+		_knockback_vy = kb_y
+	else:
+		_knockback_vx += vx
+		_knockback_vy += kb_y
 	_state = State.WANDER
 	_velocity_y = 0.0
 	_jump_dir = 0.0
