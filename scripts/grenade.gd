@@ -71,7 +71,7 @@ func set_player_safe(safe: bool) -> void:
 			add_collision_exception_with(player)
 
 
-func _prime_explode() -> void:
+func _prime_explode(immediate_target: Node = null) -> void:
 	if _exploded or _priming:
 		return
 	_priming = true
@@ -83,6 +83,15 @@ func _prime_explode() -> void:
 	if visual != null:
 		visual.color = Color(1.0, 1.0, 1.0, 1.0)
 		visual.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	if immediate_target != null and not _damaged.has(immediate_target):
+		_damaged.append(immediate_target)
+		if immediate_target.has_method("take_damage"):
+			if immediate_target.is_in_group("player"):
+				immediate_target.take_damage(PLAYER_DAMAGE)
+			else:
+				immediate_target.take_damage(ENEMY_DAMAGE)
+		elif not immediate_target.is_in_group("player"):
+			immediate_target.queue_free()
 	get_tree().create_timer(PRIME_DELAY).timeout.connect(_explode)
 
 
@@ -114,20 +123,20 @@ func _physics_process(delta: float) -> void:
 		var player_contact: bool = collider_node != null and collider_node.is_in_group("player")
 		var dodging: bool = player_contact and collider_node.is_in_group("dashing")
 		if _arm_left <= 0.0 and player_contact and not dodging and not _player_safe:
-			_prime_explode()
+			_prime_explode(collider_node)
 			return
 		velocity = velocity.bounce(collision.get_normal()) * BOUNCE_DAMP
 
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D and global_position.distance_to((enemy as Node2D).global_position) <= CONTACT_RADIUS:
-			_prime_explode()
+			_prime_explode(enemy)
 			return
 
 	if _arm_left <= 0.0 and not _player_safe:
 		var p := get_tree().get_first_node_in_group("player")
 		if p is Node2D and not (p as Node).is_in_group("dashing") \
 				and global_position.distance_to((p as Node2D).global_position) <= PLAYER_CONTACT_RADIUS:
-			_prime_explode()
+			_prime_explode(p)
 			return
 
 	for f in get_tree().get_nodes_in_group("fruit"):
