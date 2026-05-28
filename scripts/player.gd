@@ -39,8 +39,8 @@ const MAX_HEALTH := 3
 const INVULN_TIME := 1.0
 const FALL_DEATH_Y := 350.0
 
-const SWING_DURATION := 0.13
-const SWING_COOLDOWN := 0.28
+const SWING_DURATION := 0.11
+const SWING_COOLDOWN := 0.24
 const SWING_REACH_BASE := 36.0
 const SWING_REACH_PER_CHARGE := 4.0
 const SWING_KNOCKBACK_ENEMY_BASE := 320.0
@@ -48,7 +48,7 @@ const SWING_KNOCKBACK_GRENADE_BASE := 360.0
 const SWING_CHARGE_MAX := 5.0
 const SWING_CHARGE_KB_MULT_PER_SEC := 0.4
 const SWING_DAMAGE := 1
-const SWING_BAT_LENGTH := 30.0
+const SWING_BAT_LENGTH := 24.0
 const SWING_BAT_THICKNESS := 5.0
 const SWING_BAT_COLOR := Color(0.75, 0.5, 0.2, 1.0)
 const SWING_BAT_FULL_COLOR := Color(1.0, 0.3, 0.15, 1.0)
@@ -544,6 +544,7 @@ func _do_grenade_lob(dir: Vector2, charge_seconds: float) -> void:
 	grenade.direction = 0.0
 	get_parent().add_child(grenade)
 	Audio.play_sfx("tap")
+	Audio.play_sfx_layered("power_up")
 	var lob_speed: float = SWING_LOB_BASE_SPEED * (1.0 + charge_seconds * SWING_LOB_MULT_PER_SEC)
 	if grenade.has_method("apply_knockback"):
 		grenade.apply_knockback(dir.x * lob_speed, dir.y * lob_speed)
@@ -582,6 +583,10 @@ func _get_swing_direction() -> Vector2:
 		return Vector2(0.0, -1.0)
 	if Input.is_action_pressed("slam"):
 		return Vector2(0.0, 1.0)
+	if Input.is_action_pressed("move_left"):
+		return Vector2(-1.0, 0.0)
+	if Input.is_action_pressed("move_right"):
+		return Vector2(1.0, 0.0)
 	return Vector2(_facing, 0.0)
 
 

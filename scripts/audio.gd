@@ -33,3 +33,14 @@ func play_sfx(sfx_name: String) -> void:
 	if SFX.has(sfx_name):
 		_sfx_player.stream = SFX[sfx_name]
 		_sfx_player.play()
+
+
+func play_sfx_layered(sfx_name: String) -> void:
+	if not SFX.has(sfx_name):
+		return
+	var p := AudioStreamPlayer.new()
+	p.stream = SFX[sfx_name]
+	p.volume_db = -9.0
+	add_child(p)
+	p.finished.connect(p.queue_free)
+	p.play()
