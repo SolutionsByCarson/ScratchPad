@@ -5,7 +5,7 @@ extends Area2D
 @export var aggro_y_tolerance: float = 24.0
 @export var aggro_duration: float = 30.0
 @export var wander_radius: float = 48.0
-@export var max_health: int = 3
+@export var max_health: int = 4
 
 const HURT_COOLDOWN := 0.6
 const WANDER_SPEED := 24.0

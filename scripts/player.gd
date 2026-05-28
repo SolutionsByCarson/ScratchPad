@@ -19,7 +19,7 @@ const WALL_GRACE_TIME := 0.06
 const SLAM_SPEED := 500.0
 const SLAM_RADIUS := 36.0
 const SLAM_LAND_DURATION := 0.18
-const SLAM_DAMAGE := 3
+const SLAM_DAMAGE := 4
 
 const DASH_SCALE := Vector2(1.45, 0.7)
 const SLAM_DESCENT_SCALE := Vector2(0.65, 1.45)
