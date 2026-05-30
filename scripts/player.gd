@@ -65,7 +65,8 @@ const SLAM_RING_SEGMENTS := 32
 # Multiplier scales linearly from there and is capped at SLAM_FALL_MAX_MULT.
 const SLAM_FALL_THRESHOLD := 0.15
 const SLAM_FALL_REFERENCE := 0.30
-const SLAM_FALL_MAX_MULT := 4.0
+const SLAM_FALL_MIN_MULT := 0.75   # Floor once above threshold so even short slams feel meaty.
+const SLAM_FALL_MAX_MULT := 1.5    # Cap so long falls don't go absurd.
 
 # ---------------------------------------------------------------------------
 # Sprite scaling (squash & stretch) + afterimages
@@ -495,6 +496,9 @@ func _physics_process(delta: float) -> void:
 				(_slam_fall_time - SLAM_FALL_THRESHOLD) / (SLAM_FALL_REFERENCE - SLAM_FALL_THRESHOLD),
 				0.0, SLAM_FALL_MAX_MULT)
 			if fall_mult > 0.0:
+				# Floor at MIN_MULT so any slam that crosses the threshold has
+				# real impact, not a near-zero ramp-in.
+				fall_mult = max(fall_mult, SLAM_FALL_MIN_MULT)
 				_do_slam_damage(fall_mult)
 		else:
 			velocity += get_gravity() * delta
