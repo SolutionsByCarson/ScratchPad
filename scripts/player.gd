@@ -51,10 +51,13 @@ const WALL_GRACE_TIME := 0.06
 # Ground slam — Down/S in the air
 # ---------------------------------------------------------------------------
 const SLAM_SPEED := 500.0           # Forced downward velocity once slamming.
-const SLAM_RADIUS := 36.0           # AOE radius for slam damage/knockback on landing.
+const SLAM_RADIUS := 56.0           # Sphere AOE radius — reaches airborne enemies above + beside.
 const SLAM_LAND_DURATION := 0.18    # How long the slam-landing squash visual holds.
-const SLAM_DAMAGE := 4              # Damage dealt to each enemy in radius on landing.
+const SLAM_DAMAGE := 2              # Damage dealt to each enemy in radius on landing.
 const SLAM_KNOCKBACK := 160.0       # Radial knockback magnitude on landing (half of bat).
+const SLAM_RING_DURATION := 0.28    # Visual impact ring expansion time.
+const SLAM_RING_COLOR := Color(0.6, 0.85, 1.0, 0.7)  # Pale-blue shockwave color.
+const SLAM_RING_SEGMENTS := 32
 
 # ---------------------------------------------------------------------------
 # Sprite scaling (squash & stretch) + afterimages
@@ -905,10 +908,13 @@ func _hide_swing_visual() -> void:
 # ============================================================================
 
 func _do_slam_damage() -> void:
+	_spawn_slam_ring()
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D:
 			var e: Node2D = enemy
 			var to_enemy: Vector2 = e.global_position - global_position
+			# Sphere AOE: Euclidean distance, so airborne enemies above the
+			# player are picked up the same as enemies to the side.
 			if to_enemy.length() <= SLAM_RADIUS:
 				# Direction from player to enemy. If overlapping, fall back to
 				# a forward+slightly-up vector so the enemy still gets shoved.
@@ -923,3 +929,30 @@ func _do_slam_damage() -> void:
 					e.take_damage(SLAM_DAMAGE)
 				else:
 					e.queue_free()
+
+
+# Pale-blue shockwave ring that snaps out to SLAM_RADIUS over SLAM_RING_DURATION,
+# then fades. Parented to our parent so it stays at the impact point even
+# though the player keeps moving.
+func _spawn_slam_ring() -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var pts: PackedVector2Array = []
+	for i in range(SLAM_RING_SEGMENTS):
+		var a: float = TAU * float(i) / float(SLAM_RING_SEGMENTS)
+		pts.append(Vector2(cos(a), sin(a)) * SLAM_RADIUS)
+	var ring := Polygon2D.new()
+	ring.polygon = pts
+	ring.color = SLAM_RING_COLOR
+	ring.scale = Vector2(0.05, 0.05)
+	ring.z_index = 5
+	parent.add_child(ring)
+	ring.global_position = global_position
+
+	var scale_tw := ring.create_tween()
+	scale_tw.tween_property(ring, "scale", Vector2.ONE, SLAM_RING_DURATION) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var fade_tw := ring.create_tween()
+	fade_tw.tween_property(ring, "modulate:a", 0.0, SLAM_RING_DURATION)
+	fade_tw.tween_callback(ring.queue_free)
