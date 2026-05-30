@@ -101,8 +101,6 @@ func set_player_safe(safe: bool) -> void:
 func _prime_explode(immediate_target: Node = null) -> void:
 	if _exploded or _priming:
 		return
-	if not is_inside_tree():
-		return
 	_priming = true
 	velocity = Vector2.ZERO
 	if _blink_tween != null and _blink_tween.is_valid():
@@ -121,10 +119,11 @@ func _prime_explode(immediate_target: Node = null) -> void:
 				immediate_target.take_damage(ENEMY_DAMAGE)
 		elif not immediate_target.is_in_group("player"):
 			immediate_target.queue_free()
-	# take_damage on the player may call _die() → reload_current_scene(),
-	# which removes us from the tree mid-function. Re-check before scheduling.
-	if is_inside_tree():
-		get_tree().create_timer(PRIME_DELAY).timeout.connect(_explode)
+	# take_damage on the player can call _die() → reload_current_scene(),
+	# which removes us from the tree mid-function. Bail out cleanly.
+	if not is_inside_tree():
+		return
+	get_tree().create_timer(PRIME_DELAY).timeout.connect(_explode)
 
 
 func _start_timeout_blink() -> void:
