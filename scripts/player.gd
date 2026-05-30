@@ -21,6 +21,7 @@ const SLAM_SPEED := 500.0
 const SLAM_RADIUS := 36.0
 const SLAM_LAND_DURATION := 0.18
 const SLAM_DAMAGE := 4
+const SLAM_KNOCKBACK := 160.0
 
 const DASH_SCALE := Vector2(1.45, 0.7)
 const SLAM_DESCENT_SCALE := Vector2(0.65, 1.45)
@@ -646,7 +647,15 @@ func _do_slam_damage() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D:
 			var e: Node2D = enemy
-			if global_position.distance_to(e.global_position) <= SLAM_RADIUS:
+			var to_enemy: Vector2 = e.global_position - global_position
+			if to_enemy.length() <= SLAM_RADIUS:
+				var dir: Vector2
+				if to_enemy.length() > 0.01:
+					dir = to_enemy.normalized()
+				else:
+					dir = Vector2(_facing, -0.5).normalized()
+				if e.has_method("apply_knockback"):
+					e.call("apply_knockback", dir.x * SLAM_KNOCKBACK, dir.y * SLAM_KNOCKBACK)
 				if e.has_method("take_damage"):
 					e.take_damage(SLAM_DAMAGE)
 				else:
