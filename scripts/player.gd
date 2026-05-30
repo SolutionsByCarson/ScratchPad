@@ -55,9 +55,9 @@ const SLAM_RADIUS := 45.0           # Sphere AOE radius — reaches airborne ene
 const SLAM_LAND_DURATION := 0.18    # How long the slam-landing squash visual holds.
 const SLAM_DAMAGE := 2              # Damage dealt to each enemy in radius on landing.
 const SLAM_KNOCKBACK := 160.0       # Radial knockback magnitude on landing (half of bat).
-const SLAM_RING_DURATION := 0.28    # Visual impact ring expansion time.
 const SLAM_RING_COLOR := Color(0.6, 0.85, 1.0, 0.7)  # Pale-blue shockwave color.
 const SLAM_RING_SEGMENTS := 32
+const SLAM_WAVE_SPEED := 240.0      # px/s — matches grenade-style expanding wave.
 # Fall-time scaling. The slam's impact is proportional to how long the player
 # was in downward motion before landing. Below SLAM_FALL_THRESHOLD (a basic
 # jump-then-slam), nothing happens. At SLAM_FALL_REFERENCE (~2x threshold,
@@ -137,6 +137,16 @@ var _wall_jump_lock_left := 0.0       # >0 suppresses horizontal input applicati
 var _slamming := false
 var _slam_land_timer := 0.0           # Visual hold for slam-landing squash.
 var _slam_fall_time := 0.0            # Seconds the current slam has spent in downward motion.
+# Slam shockwave state — mirrors the grenade wave model. Expands from origin
+# at SLAM_WAVE_SPEED until reaching _slam_wave_max; enemies get knockback +
+# damage exactly when the wave's growing radius first reaches them.
+var _slam_wave_active := false
+var _slam_wave_radius := 0.0
+var _slam_wave_max := 0.0
+var _slam_wave_origin := Vector2.ZERO
+var _slam_wave_knockback := 0.0
+var _slam_wave_damage := 0
+var _slam_damaged: Array = []         # Enemies the current wave has already hit (no double-hits).
 var _afterimage_timer := 0.0          # Ticks down between afterimage spawns.
 var _ignore_wall_normal_x := 0.0      # Wall normal we just jumped FROM; filtered until lock expires.
 var _wall_grace_left := 0.0
@@ -277,6 +287,7 @@ func _die() -> void:
 
 func _physics_process(delta: float) -> void:
 	_update_visual_scale(delta)  # Sprite squash/stretch tracking dash/slam/landing.
+	_tick_slam_wave(delta)       # Expand the slam shockwave + knock crossing enemies.
 
 	_invuln_left = max(0.0, _invuln_left - delta)
 	# Death pit check — runs BEFORE other physics so dash/slam can't outrun it.
@@ -929,37 +940,59 @@ func _hide_swing_visual() -> void:
 # ============================================================================
 
 func _do_slam_damage(mult: float) -> void:
-	# Everything scales linearly with the fall-time multiplier.
-	var radius: float = SLAM_RADIUS * mult
-	var damage: int = maxi(1, roundi(float(SLAM_DAMAGE) * mult))
-	var knockback: float = SLAM_KNOCKBACK * mult
-	_spawn_slam_ring(radius)
+	# Initialize the shockwave state. From here, _tick_slam_wave drives the
+	# expansion; impact is applied to enemies as the wave radius reaches them
+	# (same pattern as the grenade explosion in grenade.gd / _tick_wave).
+	var max_radius: float = SLAM_RADIUS * mult
+	_slam_wave_active = true
+	_slam_wave_radius = 0.0
+	_slam_wave_max = max_radius
+	_slam_wave_origin = global_position
+	_slam_wave_knockback = SLAM_KNOCKBACK * mult
+	_slam_wave_damage = maxi(1, roundi(float(SLAM_DAMAGE) * mult))
+	_slam_damaged.clear()
+	# Visual ring expands linearly at the same speed as the damage wave,
+	# so what you see is what you get.
+	_spawn_slam_ring(max_radius, max_radius / SLAM_WAVE_SPEED)
+
+
+# Per-frame shockwave tick. Grows _slam_wave_radius at SLAM_WAVE_SPEED and
+# applies knockback + damage to any enemy the expanding circle has just
+# crossed. Each enemy is hit at most once (tracked in _slam_damaged).
+func _tick_slam_wave(delta: float) -> void:
+	if not _slam_wave_active:
+		return
+	_slam_wave_radius = min(_slam_wave_radius + SLAM_WAVE_SPEED * delta, _slam_wave_max)
 	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if _slam_damaged.has(enemy):
+			continue
 		if enemy is Node2D:
 			var e: Node2D = enemy
-			var to_enemy: Vector2 = e.global_position - global_position
-			# Sphere AOE: Euclidean distance, so airborne enemies above the
-			# player are picked up the same as enemies to the side.
-			if to_enemy.length() <= radius:
-				# Direction from player to enemy. If overlapping, fall back to
-				# a forward+slightly-up vector so the enemy still gets shoved.
+			# Wave origin is fixed at the landing point — wave doesn't follow
+			# the player as they move after the slam.
+			var to_enemy: Vector2 = e.global_position - _slam_wave_origin
+			if to_enemy.length() <= _slam_wave_radius:
+				_slam_damaged.append(enemy)
+				# Knockback direction is radially outward FROM the player at
+				# landing, not from the current player position.
 				var dir: Vector2
 				if to_enemy.length() > 0.01:
 					dir = to_enemy.normalized()
 				else:
 					dir = Vector2(_facing, -0.5).normalized()
 				if e.has_method("apply_knockback"):
-					e.call("apply_knockback", dir.x * knockback, dir.y * knockback)
+					e.call("apply_knockback", dir.x * _slam_wave_knockback, dir.y * _slam_wave_knockback)
 				if e.has_method("take_damage"):
-					e.take_damage(damage)
+					e.take_damage(_slam_wave_damage)
 				else:
 					e.queue_free()
+	if _slam_wave_radius >= _slam_wave_max:
+		_slam_wave_active = false
 
 
-# Pale-blue shockwave ring that snaps out to the given radius over
-# SLAM_RING_DURATION, then fades. Parented to our parent so it stays at the
-# impact point even though the player keeps moving.
-func _spawn_slam_ring(radius: float) -> void:
+# Pale-blue shockwave ring that snaps out to the given radius linearly over
+# the given duration (matched to the damage wave), then fades.
+func _spawn_slam_ring(radius: float, duration: float) -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
@@ -975,9 +1008,10 @@ func _spawn_slam_ring(radius: float) -> void:
 	parent.add_child(ring)
 	ring.global_position = global_position
 
+	# Linear expansion so the visual edge tracks the damage wave 1:1.
 	var scale_tw := ring.create_tween()
-	scale_tw.tween_property(ring, "scale", Vector2.ONE, SLAM_RING_DURATION) \
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	scale_tw.tween_property(ring, "scale", Vector2.ONE, duration) \
+		.set_trans(Tween.TRANS_LINEAR)
 	var fade_tw := ring.create_tween()
-	fade_tw.tween_property(ring, "modulate:a", 0.0, SLAM_RING_DURATION)
+	fade_tw.tween_property(ring, "modulate:a", 0.0, duration)
 	fade_tw.tween_callback(ring.queue_free)
