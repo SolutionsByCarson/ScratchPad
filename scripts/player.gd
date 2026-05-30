@@ -42,8 +42,9 @@ const FALL_DEATH_Y := 350.0
 
 const SWING_DURATION := 0.11
 const SWING_COOLDOWN := 0.24
-const SWING_REACH_BASE := 36.0
-const SWING_REACH_PER_CHARGE := 2.0
+const SWING_REACH_BASE := 52.0
+const SWING_REACH_PER_CHARGE := 3.0
+const SWING_POINT_BLANK := 14.0
 const SWING_KNOCKBACK_ENEMY_BASE := 320.0
 const SWING_KNOCKBACK_GRENADE_BASE := 360.0
 const SWING_CHARGE_MAX := 3.0
@@ -621,11 +622,15 @@ func _get_swing_direction() -> Vector2:
 
 func _in_swing_arc(target: Node2D, dir: Vector2, reach: float) -> bool:
 	var to_target: Vector2 = target.global_position - global_position
-	if to_target.length() > reach:
+	var dist: float = to_target.length()
+	if dist > reach:
 		return false
-	if to_target.length() < 0.01:
+	# Point-blank: always hit anything inside this radius regardless of facing.
+	if dist < SWING_POINT_BLANK:
 		return true
-	return to_target.normalized().dot(dir) > 0.0
+	# Otherwise require the target to be roughly in the swing hemisphere.
+	# dot > -0.15 widens it from 180° to ~198° for a more forgiving arc.
+	return to_target.normalized().dot(dir) > -0.15
 
 
 func _hide_swing_visual() -> void:
