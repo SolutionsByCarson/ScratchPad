@@ -208,15 +208,24 @@ func _physics_process(delta: float) -> void:
 		_shoot()
 
 	_swing_cooldown_left = max(0.0, _swing_cooldown_left - delta)
-	if Input.is_action_just_pressed("swing") and not _swing_charging and not _throw_charging \
-			and not _wall_attached and _dash_time_left <= 0.0 and _swing_cooldown_left <= 0.0:
-		_swing_charging = true
-		_swing_charge = 0.0
-		_last_swing_tick = 0
-		if _charge_label != null:
-			_charge_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3, 1.0))
-			_charge_label.text = "0"
-			_charge_label.visible = true
+	if Input.is_action_just_pressed("swing"):
+		if _throw_charging:
+			var existing_g2 := get_tree().get_first_node_in_group("grenade")
+			if existing_g2 == null:
+				_do_grenade_lob(_get_swing_direction(), 0.0, _throw_charge)
+				_throw_charging = false
+				_throw_charge = 0.0
+				if _charge_label != null:
+					_charge_label.visible = false
+		elif not _swing_charging and not _wall_attached \
+				and _dash_time_left <= 0.0 and _swing_cooldown_left <= 0.0:
+			_swing_charging = true
+			_swing_charge = 0.0
+			_last_swing_tick = 0
+			if _charge_label != null:
+				_charge_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3, 1.0))
+				_charge_label.text = "0"
+				_charge_label.visible = true
 	if _swing_charging:
 		if Input.is_action_pressed("swing"):
 			_swing_charge = min(_swing_charge + delta, SWING_CHARGE_MAX)
@@ -547,19 +556,21 @@ func _do_swing(charge_seconds: float) -> void:
 				Audio.play_sfx_layered("power_up")
 
 
-func _do_grenade_lob(dir: Vector2, charge_seconds: float) -> void:
+func _do_grenade_lob(dir: Vector2, bat_charge: float, grenade_charge: float = 0.0) -> void:
 	var grenade := GRENADE_SCENE.instantiate()
 	grenade.position = global_position + Vector2(_facing * 2.0, -10.0)
 	grenade.direction = 0.0
 	get_parent().add_child(grenade)
 	if grenade.has_method("set_player_safe"):
 		grenade.set_player_safe(true)
+	if grenade.has_method("set_charge"):
+		grenade.set_charge(grenade_charge)
 	if grenade.has_method("apply_knockback"):
 		grenade.apply_knockback(0.0, -90.0)
 	Audio.play_sfx("tap")
-	_animate_bat(dir, charge_seconds)
+	_animate_bat(dir, bat_charge)
 	_swing_cooldown_left = SWING_COOLDOWN
-	var lob_speed: float = SWING_LOB_BASE_SPEED * (1.0 + charge_seconds * SWING_LOB_MULT_PER_SEC)
+	var lob_speed: float = SWING_LOB_BASE_SPEED * (1.0 + bat_charge * SWING_LOB_MULT_PER_SEC)
 	var grenade_ref: Node = grenade
 	get_tree().create_timer(SWING_DURATION * 0.5).timeout.connect(func() -> void:
 		if not is_instance_valid(grenade_ref):
