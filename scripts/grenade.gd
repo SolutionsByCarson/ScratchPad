@@ -101,6 +101,8 @@ func set_player_safe(safe: bool) -> void:
 func _prime_explode(immediate_target: Node = null) -> void:
 	if _exploded or _priming:
 		return
+	if not is_inside_tree():
+		return
 	_priming = true
 	velocity = Vector2.ZERO
 	if _blink_tween != null and _blink_tween.is_valid():
