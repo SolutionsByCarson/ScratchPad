@@ -49,7 +49,7 @@ const SWING_KNOCKBACK_ENEMY_BASE := 320.0
 const SWING_KNOCKBACK_GRENADE_BASE := 360.0
 const SWING_CHARGE_MAX := 3.0
 const SWING_CHARGE_KB_MULT_PER_SEC := 0.2
-const SWING_DAMAGE := 1
+const SWING_DAMAGE_PER_HIT := 0.5
 const SWING_BAT_LENGTH := 24.0
 const SWING_BAT_THICKNESS := 5.0
 const SWING_BAT_COLOR := Color(0.75, 0.5, 0.2, 1.0)
@@ -87,6 +87,7 @@ var _swing_visual: Polygon2D
 var _swing_charging := false
 var _swing_charge := 0.0
 var _last_swing_tick := 0
+var _swing_damage_carry := 0.0
 
 
 func _ready() -> void:
@@ -541,13 +542,16 @@ func _do_swing(charge_seconds: float) -> void:
 	var enemy_kb: float = SWING_KNOCKBACK_ENEMY_BASE * charge_mult
 	var grenade_kb: float = SWING_KNOCKBACK_GRENADE_BASE * charge_mult
 
+	_swing_damage_carry += SWING_DAMAGE_PER_HIT
+	var dmg: int = int(floor(_swing_damage_carry))
+	_swing_damage_carry -= float(dmg)
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D and _in_swing_arc(enemy as Node2D, dir, reach):
 			var e: Node = enemy
 			if e.has_method("apply_knockback"):
 				e.call("apply_knockback", dir.x * enemy_kb, dir.y * enemy_kb)
-			if e.has_method("take_damage"):
-				e.call("take_damage", SWING_DAMAGE)
+			if dmg > 0 and e.has_method("take_damage"):
+				e.call("take_damage", dmg)
 
 	for g in get_tree().get_nodes_in_group("grenade"):
 		if g is Node2D and _in_swing_arc(g as Node2D, dir, reach):
