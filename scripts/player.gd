@@ -490,11 +490,11 @@ func _physics_process(delta: float) -> void:
 			_slam_land_timer = SLAM_LAND_DURATION
 			# Convert fall time → impact multiplier. Below threshold = nothing,
 			# above ref = linear scaling, capped at SLAM_FALL_MAX_MULT.
+			Audio.play_sfx("explosion")
 			var fall_mult: float = clampf(
 				(_slam_fall_time - SLAM_FALL_THRESHOLD) / (SLAM_FALL_REFERENCE - SLAM_FALL_THRESHOLD),
 				0.0, SLAM_FALL_MAX_MULT)
 			if fall_mult > 0.0:
-				Audio.play_sfx("explosion")
 				_do_slam_damage(fall_mult)
 		else:
 			velocity += get_gravity() * delta
