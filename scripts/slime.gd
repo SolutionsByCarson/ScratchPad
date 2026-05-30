@@ -279,8 +279,18 @@ func _tick_knockback(delta: float) -> bool:
 		_knockback_vx = 0.0
 		_knockback_vy = 0.0
 		return false
-	position.x += _knockback_vx * delta
-	position.y += _knockback_vy * delta
+	# Horizontal: bounce off walls instead of phasing through.
+	var next_x: float = position.x + _knockback_vx * delta
+	if _knockback_vx != 0.0 and _is_blocked_at(next_x + signf(_knockback_vx) * 4.0, position.y):
+		_knockback_vx = -_knockback_vx * 0.5
+	else:
+		position.x = next_x
+	# Vertical: bounce off ceilings; ground handled by the snap below.
+	var next_y: float = position.y + _knockback_vy * delta
+	if _knockback_vy < 0.0 and _is_blocked_at(position.x, next_y - 6.0):
+		_knockback_vy = -_knockback_vy * 0.5
+	else:
+		position.y = next_y
 	_knockback_vy += GRAVITY * delta
 	var decay: float = signf(_knockback_vx) * KNOCKBACK_DECAY * delta
 	if absf(_knockback_vx) <= absf(decay):
