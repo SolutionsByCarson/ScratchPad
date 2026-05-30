@@ -51,13 +51,21 @@ const WALL_GRACE_TIME := 0.06
 # Ground slam — Down/S in the air
 # ---------------------------------------------------------------------------
 const SLAM_SPEED := 500.0           # Forced downward velocity once slamming.
-const SLAM_RADIUS := 56.0           # Sphere AOE radius — reaches airborne enemies above + beside.
+const SLAM_RADIUS := 45.0           # Sphere AOE radius — reaches airborne enemies above + beside.
 const SLAM_LAND_DURATION := 0.18    # How long the slam-landing squash visual holds.
 const SLAM_DAMAGE := 2              # Damage dealt to each enemy in radius on landing.
 const SLAM_KNOCKBACK := 160.0       # Radial knockback magnitude on landing (half of bat).
 const SLAM_RING_DURATION := 0.28    # Visual impact ring expansion time.
 const SLAM_RING_COLOR := Color(0.6, 0.85, 1.0, 0.7)  # Pale-blue shockwave color.
 const SLAM_RING_SEGMENTS := 32
+# Fall-time scaling. The slam's impact is proportional to how long the player
+# was in downward motion before landing. Below SLAM_FALL_THRESHOLD (a basic
+# jump-then-slam), nothing happens. At SLAM_FALL_REFERENCE (~2x threshold,
+# slam from twice the height) the multiplier is 1.0 = "minimal effect".
+# Multiplier scales linearly from there and is capped at SLAM_FALL_MAX_MULT.
+const SLAM_FALL_THRESHOLD := 0.15
+const SLAM_FALL_REFERENCE := 0.30
+const SLAM_FALL_MAX_MULT := 4.0
 
 # ---------------------------------------------------------------------------
 # Sprite scaling (squash & stretch) + afterimages
@@ -127,6 +135,7 @@ var _wall_stick_left := WALL_STICK_TIME
 var _wall_jump_lock_left := 0.0       # >0 suppresses horizontal input application.
 var _slamming := false
 var _slam_land_timer := 0.0           # Visual hold for slam-landing squash.
+var _slam_fall_time := 0.0            # Seconds the current slam has spent in downward motion.
 var _afterimage_timer := 0.0          # Ticks down between afterimage spawns.
 var _ignore_wall_normal_x := 0.0      # Wall normal we just jumped FROM; filtered until lock expires.
 var _wall_grace_left := 0.0
@@ -468,21 +477,29 @@ func _physics_process(delta: float) -> void:
 	# Start slam: only in the air, only if not already slamming.
 	if not is_on_floor() and not _slamming and Input.is_action_just_pressed("slam"):
 		_slamming = true
+		_slam_fall_time = 0.0       # Reset; we time downward motion from here.
 		velocity.x = 0.0
 		velocity.y = SLAM_SPEED
 		_afterimage_timer = 0.0
 
 	# Active slam — falls at SLAM_SPEED+gravity until floor contact, then deals
-	# AOE damage/knockback and triggers landing squash.
+	# AOE damage/knockback (scaled by fall time) and triggers landing squash.
 	if _slamming:
 		if is_on_floor():
 			_slamming = false
 			_slam_land_timer = SLAM_LAND_DURATION
-			Audio.play_sfx("explosion")
-			_do_slam_damage()
+			# Convert fall time → impact multiplier. Below threshold = nothing,
+			# above ref = linear scaling, capped at SLAM_FALL_MAX_MULT.
+			var fall_mult: float = clampf(
+				(_slam_fall_time - SLAM_FALL_THRESHOLD) / (SLAM_FALL_REFERENCE - SLAM_FALL_THRESHOLD),
+				0.0, SLAM_FALL_MAX_MULT)
+			if fall_mult > 0.0:
+				Audio.play_sfx("explosion")
+				_do_slam_damage(fall_mult)
 		else:
 			velocity += get_gravity() * delta
 			velocity.x = 0.0
+			_slam_fall_time += delta
 			_afterimage_timer -= delta
 			if _afterimage_timer <= 0.0:
 				_spawn_afterimage()
@@ -907,15 +924,19 @@ func _hide_swing_visual() -> void:
 # slam feels meaningful but distinct from a directional bat hit.
 # ============================================================================
 
-func _do_slam_damage() -> void:
-	_spawn_slam_ring()
+func _do_slam_damage(mult: float) -> void:
+	# Everything scales linearly with the fall-time multiplier.
+	var radius: float = SLAM_RADIUS * mult
+	var damage: int = maxi(1, roundi(float(SLAM_DAMAGE) * mult))
+	var knockback: float = SLAM_KNOCKBACK * mult
+	_spawn_slam_ring(radius)
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy is Node2D:
 			var e: Node2D = enemy
 			var to_enemy: Vector2 = e.global_position - global_position
 			# Sphere AOE: Euclidean distance, so airborne enemies above the
 			# player are picked up the same as enemies to the side.
-			if to_enemy.length() <= SLAM_RADIUS:
+			if to_enemy.length() <= radius:
 				# Direction from player to enemy. If overlapping, fall back to
 				# a forward+slightly-up vector so the enemy still gets shoved.
 				var dir: Vector2
@@ -924,24 +945,24 @@ func _do_slam_damage() -> void:
 				else:
 					dir = Vector2(_facing, -0.5).normalized()
 				if e.has_method("apply_knockback"):
-					e.call("apply_knockback", dir.x * SLAM_KNOCKBACK, dir.y * SLAM_KNOCKBACK)
+					e.call("apply_knockback", dir.x * knockback, dir.y * knockback)
 				if e.has_method("take_damage"):
-					e.take_damage(SLAM_DAMAGE)
+					e.take_damage(damage)
 				else:
 					e.queue_free()
 
 
-# Pale-blue shockwave ring that snaps out to SLAM_RADIUS over SLAM_RING_DURATION,
-# then fades. Parented to our parent so it stays at the impact point even
-# though the player keeps moving.
-func _spawn_slam_ring() -> void:
+# Pale-blue shockwave ring that snaps out to the given radius over
+# SLAM_RING_DURATION, then fades. Parented to our parent so it stays at the
+# impact point even though the player keeps moving.
+func _spawn_slam_ring(radius: float) -> void:
 	var parent := get_parent()
 	if parent == null:
 		return
 	var pts: PackedVector2Array = []
 	for i in range(SLAM_RING_SEGMENTS):
 		var a: float = TAU * float(i) / float(SLAM_RING_SEGMENTS)
-		pts.append(Vector2(cos(a), sin(a)) * SLAM_RADIUS)
+		pts.append(Vector2(cos(a), sin(a)) * radius)
 	var ring := Polygon2D.new()
 	ring.polygon = pts
 	ring.color = SLAM_RING_COLOR
